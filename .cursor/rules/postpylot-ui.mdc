@@ -1,0 +1,65 @@
+---
+description: PostPylot design system, landing page sections, and animation rules
+globs: apps/web/**/*.{tsx,css},**/components/**/*
+alwaysApply: false
+---
+
+# PostPylot — UI & Design
+
+## Color Palette
+
+| Token | Hex |
+|-------|-----|
+| Midnight Navy | `#050B18` |
+| Deep Space Blue | `#071A2F` |
+| Electric Blue | `#2563EB` |
+| Cyan Glow | `#22D3EE` |
+| Violet AI Accent | `#8B5CF6` |
+| Soft Gray | `#CBD5E1` |
+| Success | `#22C55E` |
+| Warning | `#F59E0B` |
+| Error | `#EF4444` |
+
+## Typography
+
+- Headings: **Space Grotesk** or **Sora**
+- Body: **Inter**
+- Technical/AI accent: **JetBrains Mono**
+
+## Landing Page (`/`) — 12 Sections
+
+Navbar → Hero → Problem → Solution Pipeline → Platforms → AI Video → TikTok → Dashboard Preview → Automation Rules → Pricing/Beta → Final CTA → Footer
+
+**Hero copy:** "Your AI content engine on autopilot."  
+**Subcopy:** Generate, schedule, publish, and track across YouTube, TikTok, LinkedIn, and Facebook.  
+**CTAs:** "Launch PostPylot" (→ `/login`), "Watch Demo"
+
+**Pipeline animation (scroll-triggered):** Topic → Research → Writer → Image/Thumbnail → Video → Scheduler → Publisher → Analytics
+
+Show X/Twitter as "Coming later".
+
+## Landing Animation Rules
+
+- Framer Motion for entrances; GSAP for complex scroll triggers; Lenis for smooth scroll.
+- Lazy-load heavy animation; no layout shift; respect `prefers-reduced-motion`.
+- Glassmorphism cards, orbit/glow effects, floating dashboard preview.
+
+## Dashboard UI Rules
+
+- Solid clean cards (not glassmorphism); sidebar + topbar + mobile nav.
+- Subtle card entrance, hover lift, skeleton loaders, progress bars, confetti on success.
+- No heavy 3D in dashboard. Mobile-first PWA layouts.
+
+## PWA Manifest
+
+```ts
+{ name: "PostPylot", short_name: "PostPylot", start_url: "/dashboard",
+  display: "standalone", theme_color: "#050B18", background_color: "#050B18",
+  orientation: "portrait" }
+```
+
+Icons: `public/icons/icon-{72,96,128,144,152,192,384,512}x512.png`. Use branded placeholders if missing.
+
+## Accessibility
+
+Semantic HTML, keyboard nav, visible focus, sufficient contrast, alt text, ARIA only when needed.

@@ -1,0 +1,50 @@
+---
+description: PostPylot platform OAuth, publishing, scheduling, and automation
+globs: packages/platforms/**,apps/worker/**,**/publishers/**,**/accounts/**
+alwaysApply: false
+---
+
+# PostPylot — Platforms, Publishing & Jobs
+
+## Auth vs Publishing
+
+Supabase SSO (Google/GitHub/LinkedIn/Facebook) is **app login only**.  
+Each platform needs separate OAuth for publishing permissions.
+
+## Platform Requirements
+
+| Platform | MVP Actions |
+|----------|-------------|
+| YouTube | OAuth, upload video + thumbnail, title/description/tags, save video ID/URL |
+| TikTok | OAuth, Content Posting API, vertical 9:16, caption/hashtags, status check, anti-spam |
+| LinkedIn | OAuth, text + image posts, save post ID |
+| Facebook | OAuth, select Page, text + image posts, save post ID |
+
+Use `googleapis` for YouTube. TikTok via secure HTTP (no SDK required). No browser automation.
+
+## Video Pipeline (worker)
+
+Topic → Script → Voice-over (Piper) → Scenes → Captions → Render (Remotion/FFmpeg) → Thumbnail → Store → Publish → Log
+
+**YouTube:** 60–180s, 16:9, voice-over, kinetic text, captions, intro/outro, CTA.  
+**TikTok:** 15–60s, 9:16, fast hook, big captions, light branding, original content.
+
+## Image Generation (template-based)
+
+LinkedIn quote cards, Facebook promo images, YouTube thumbnails, TikTok covers. Tools: Satori + Resvg + Sharp. No paid image APIs in MVP.
+
+## Job Types (pg-boss)
+
+Generate content/image/voice, render YouTube/TikTok video, publish to each platform, collect analytics, retry failed jobs.
+
+## Automation Rules Examples
+
+Weekly LinkedIn post, weekly YouTube video, weekly TikTok video, repurpose YouTube → TikTok, pause on low quality score, pause on expired account, no duplicate topics within 30 days.
+
+## Notifications (MVP dashboard)
+
+Content generated, scheduled, video rendered, published, failed, token expired, account disconnected, automation paused.
+
+## Cost Target
+
+$0–15/month: Supabase free tier, Vercel free tier, Gemini first, Piper TTS, template images, GitHub Actions cron.

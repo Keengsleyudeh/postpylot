@@ -1,0 +1,19 @@
+{
+  "name": "postpylot",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @postpylot/web",
+    "build": "npm run build -w @postpylot/web",
+    "lint": "npm run lint -w @postpylot/web",
+    "typecheck": "npm run typecheck -w @postpylot/web",
+    "start": "npm run start -w @postpylot/web"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

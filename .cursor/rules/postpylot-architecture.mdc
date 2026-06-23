@@ -1,0 +1,63 @@
+---
+description: PostPylot monorepo structure, tech stack, and environment variables
+alwaysApply: true
+---
+
+# PostPylot — Architecture & Stack
+
+## Monorepo Layout
+
+```text
+postpylot/
+  apps/web/src/          # Next.js App Router PWA
+  apps/worker/src/       # Background jobs, rendering, publishing
+  packages/db/           # Prisma schema
+  packages/ai/           # Gemini, OpenAI, prompts, safety
+  packages/platforms/    # youtube, tiktok, linkedin, facebook
+  packages/shared/       # types, constants, utils
+```
+
+Start as a single Next.js app if needed; evolve into this structure.
+
+## Stack
+
+| Layer | Choice |
+|-------|--------|
+| Frontend | Next.js App Router, React, TS, Tailwind, shadcn/ui |
+| Animation (landing) | Framer Motion, GSAP, Lenis, typewriter-effect, react-countup |
+| Animation (dashboard) | Subtle Framer Motion only |
+| Backend | Next.js route handlers, Supabase, Prisma, PostgreSQL |
+| Jobs | pg-boss; GitHub Actions for early cron; separate worker process |
+| AI | `@google/genai` primary, `openai` fallback |
+| Images | Satori, @resvg/resvg-js, Sharp |
+| Video | Remotion, FFmpeg, Piper TTS (worker only) |
+| Charts | recharts |
+
+## Worker Responsibilities (never in frontend)
+
+Scheduled jobs, AI batch generation, image/thumbnail render, voice-over, video render, platform publish, analytics collection, retry logic.
+
+## AI Agents (structured functions in MVP)
+
+Topic, Research, Writer, Short-Form Video, YouTube Script, Thumbnail, Voice, Video, Publisher, Analytics, Quality Control.
+
+Return **structured JSON** when the app needs fields — not unstructured prose.
+
+## Platform Services
+
+Each file in `packages/platforms/` exposes:
+
+`connectAccount()`, `refreshToken()`, `publishPost()`, `publishVideo()`, `getAnalytics()`, `disconnectAccount()`
+
+Return typed unsupported responses instead of random throws.
+
+## Environment Variables
+
+Maintain `.env.example` with: `DATABASE_URL`, `DIRECT_URL`, Supabase keys, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `TOKEN_ENCRYPTION_SECRET`, OAuth creds per platform, `WEB_PUSH_*`, `APP_URL`, `NODE_ENV`. Validate on startup with `@t3-oss/env-nextjs`. Never commit `.env`.
+
+## Development Behavior
+
+- Work incrementally; small complete changes; match existing conventions.
+- Server components by default; client components only for interactivity.
+- Business logic in `lib/`, `packages/`, or services — not UI components.
+- Validate API inputs with Zod; log errors without leaking secrets.

@@ -1,0 +1,42 @@
+---
+description: PostPylot Prisma schema, brand profile, and data model rules
+globs: packages/db/**,**/prisma/**,**/brands/**
+alwaysApply: false
+---
+
+# PostPylot — Data Model
+
+## Core Tables
+
+`users`, `brands`, `platform_accounts`, `content_ideas`, `posts`, `videos`, `schedules`, `analytics`, `agent_logs`, `automation_rules`, `notifications`, `media_assets`
+
+## Enums
+
+```prisma
+enum Platform { youtube tiktok linkedin facebook }
+enum ContentStatus { draft generated scheduled publishing published failed cancelled }
+enum AccountStatus { connected expired disconnected error }
+enum AspectRatio { horizontal_16_9 vertical_9_16 square_1_1 }
+```
+
+## Key Rules
+
+- Every brand belongs to a user; posts/videos belong to brands.
+- Platform accounts belong to users (not brands).
+- Encrypt `access_token` and `refresh_token` before storage — never store raw tokens.
+- Store platform metadata and agent I/O as JSON for debugging.
+- AI generation requires at least one brand profile.
+
+## Brand Profile Fields
+
+name, industry, audience, tone, website_url, offer, content_goals, preferred_platforms, posting_frequency, forbidden_topics, preferred_cta, brand_colors, logo_url, video_style_preference
+
+## Quality Gate (before auto-publish)
+
+Score: brand relevance, clarity, platform fit, tone, duplicate risk, risk level, CTA, hashtags, media readiness.
+
+**Block auto-publish if:** high risk, low brand relevance, empty content, media failure, expired token, duplicate recent content, missing required metadata.
+
+## Content Status Flow
+
+`draft` → `generated` → `scheduled` → `publishing` → `published` | `failed` | `cancelled`
