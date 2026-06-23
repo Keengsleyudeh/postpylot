@@ -22,9 +22,17 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PostPylot",
-  description: "Your AI content engine on autopilot.",
+  title: "PostPylot — Your AI content engine on autopilot",
+  description:
+    "Generate, schedule, publish, and track content across YouTube, TikTok, LinkedIn, and Facebook without doing the repetitive work yourself.",
   applicationName: "PostPylot",
+  openGraph: {
+    title: "PostPylot — Your AI content engine on autopilot",
+    description:
+      "Generate, schedule, publish, and track content across YouTube, TikTok, LinkedIn, and Facebook.",
+    siteName: "PostPylot",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {

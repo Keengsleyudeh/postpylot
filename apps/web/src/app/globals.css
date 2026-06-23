@@ -125,6 +125,27 @@
     font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
   }
 
+  .glass-card {
+    @apply border border-white/10 bg-card/40 shadow-lg backdrop-blur-xl;
+  }
+
+  .glow-orb {
+    background: radial-gradient(
+      circle,
+      rgba(37, 99, 235, 0.35) 0%,
+      rgba(34, 211, 238, 0.15) 40%,
+      transparent 70%
+    );
+  }
+
+  .landing-section {
+    @apply relative px-6 py-20 sm:py-24;
+  }
+
+  .landing-container {
+    @apply mx-auto w-full max-w-6xl;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
