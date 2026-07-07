@@ -69,7 +69,7 @@ export function Navbar() {
           mobileOpen ? "block" : "hidden"
         )}
       >
-        <ul className="flex flex-col gap-1 px-6 py-4">
+        <ul className="landing-container flex flex-col gap-1 py-4">
           {navLinks.map((link) => (
             <li key={link.href}>
               <a
