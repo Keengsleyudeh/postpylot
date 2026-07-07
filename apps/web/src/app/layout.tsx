@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { env } from "@/lib/env";
 
 import "./globals.css";
@@ -26,6 +27,11 @@ export const metadata: Metadata = {
   description:
     "Generate, schedule, publish, and track content across YouTube, TikTok, LinkedIn, and Facebook without doing the repetitive work yourself.",
   applicationName: "PostPylot",
+  appleWebApp: {
+    capable: true,
+    title: "PostPylot",
+    statusBarStyle: "black-translucent",
+  },
   openGraph: {
     title: "PostPylot — Your AI content engine on autopilot",
     description:
@@ -60,6 +66,7 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+          <ServiceWorkerRegister />
           {children}
         </ThemeProvider>
       </body>

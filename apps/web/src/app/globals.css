@@ -146,6 +146,10 @@
     @apply mx-auto w-full max-w-6xl px-6;
   }
 
+  .dashboard-main {
+    @apply flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

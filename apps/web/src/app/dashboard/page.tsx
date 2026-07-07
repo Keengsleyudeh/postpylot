@@ -1,108 +1,80 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Activity, Building2, Calendar, Link2, Send, Sparkles } from "lucide-react";
 
-import { LogoutButton } from "@/components/auth/logout-button";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/server";
+import { getDashboardUser } from "@/lib/auth/get-dashboard-user";
 
 export const metadata: Metadata = {
-  title: "Dashboard — PostPylot",
+  title: "Overview",
 };
 
-const UPCOMING_CARDS = [
-  {
-    title: "Dashboard shell",
-    description:
-      "Sidebar, topbar, and all core routes land in Phase 5 of the build.",
-    phase: "Phase 5",
-  },
-  {
-    title: "Brand setup",
-    description:
-      "Define your brand voice, audience, and content pillars to power AI generation.",
-    phase: "Phase 6",
-  },
-  {
-    title: "Platform connections",
-    description:
-      "Connect YouTube, TikTok, LinkedIn, and Facebook Pages for publishing.",
-    phase: "Phase 9",
-  },
+const QUICK_STATS = [
+  { label: "Posts generated", value: "0", icon: Activity },
+  { label: "Scheduled", value: "0", icon: Calendar },
+  { label: "Published", value: "0", icon: Send },
+];
+
+const QUICK_LINKS = [
+  { href: "/dashboard/brands", label: "Set up a brand", icon: Building2 },
+  { href: "/dashboard/generate", label: "Generate content", icon: Sparkles },
+  { href: "/dashboard/accounts", label: "Connect platforms", icon: Link2 },
 ];
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const displayName =
-    (user.user_metadata?.full_name as string | undefined) ??
-    (user.user_metadata?.name as string | undefined) ??
-    user.email ??
-    "there";
-  const avatarUrl = user.user_metadata?.avatar_url as string | undefined;
+  const user = await getDashboardUser();
 
   return (
-    <div className="mx-auto flex min-h-svh max-w-4xl flex-col gap-8 px-6 py-16">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarUrl}
-              alt=""
-              className="size-10 rounded-full ring-1 ring-foreground/10"
-            />
-          ) : (
-            <div className="flex size-10 items-center justify-center rounded-full bg-postpylot-gradient text-sm font-semibold text-white">
-              {displayName.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div>
-            <p className="text-sm text-muted-foreground">Signed in as</p>
-            <p className="font-medium">{user.email ?? displayName}</p>
-          </div>
-        </div>
-        <LogoutButton />
-      </header>
+    <div className="mx-auto flex max-w-5xl flex-col gap-8">
+      <PageHeader
+        title={`Welcome back, ${user.displayName}.`}
+        description="Your AI content engine on autopilot. Use the sidebar to navigate your workspace."
+      />
 
-      <section className="space-y-2">
-        <Badge variant="secondary">Phase 3 — Auth complete</Badge>
-        <h1 className="font-heading text-3xl font-bold tracking-tight">
-          Welcome to PostPylot, {displayName}.
-        </h1>
-        <p className="max-w-xl text-muted-foreground">
-          You&apos;re authenticated and this route is protected. The full
-          dashboard shell, brand onboarding, and platform connections arrive
-          in upcoming phases.
-        </p>
-      </section>
+      <Badge variant="secondary" className="w-fit">
+        Phase 5 — Dashboard shell
+      </Badge>
+
+      <InstallPrompt />
 
       <section className="grid gap-4 sm:grid-cols-3">
-        {UPCOMING_CARDS.map((card) => (
-          <Card key={card.title}>
-            <CardHeader>
-              <Badge variant="outline" className="mb-2 w-fit">
-                {card.phase}
-              </Badge>
-              <CardTitle>{card.title}</CardTitle>
-              <CardDescription>{card.description}</CardDescription>
+        {QUICK_STATS.map((stat) => (
+          <Card key={stat.label}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardDescription>{stat.label}</CardDescription>
+              <stat.icon className="size-4 text-muted-foreground" aria-hidden />
             </CardHeader>
-            <CardContent />
+            <CardContent>
+              <p className="font-heading text-3xl font-bold">{stat.value}</p>
+            </CardContent>
           </Card>
         ))}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-heading text-lg font-semibold">Quick links</h2>
+        <div className="flex flex-wrap gap-2">
+          {QUICK_LINKS.map((link) => (
+            <Button
+              key={link.href}
+              variant="outline"
+              render={<Link href={link.href} />}
+              nativeButton={false}
+            >
+              <link.icon aria-hidden />
+              {link.label}
+            </Button>
+          ))}
+        </div>
       </section>
     </div>
   );
