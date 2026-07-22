@@ -1,0 +1,23 @@
+{
+  "name": "@postpylot/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@postpylot/db": "*",
+    "@postpylot/platforms": "*",
+    "@postpylot/shared": "*",
+    "dotenv": "^16.4.7",
+    "pg-boss": "^10.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  }
+}

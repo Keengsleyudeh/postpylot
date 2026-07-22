@@ -12,6 +12,8 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui/card";
+import { prisma } from "@postpylot/db";
+
 import { getDashboardUser } from "@/lib/auth/get-dashboard-user";
 import { getBrandCount } from "@/lib/brands/queries";
 
@@ -27,13 +29,27 @@ const QUICK_LINKS = [
 
 export default async function DashboardPage() {
   const user = await getDashboardUser();
-  const brandCount = await getBrandCount(user.id);
+  const [brandCount, postCount, scheduledCount, publishedCount, accountCount] =
+    await Promise.all([
+      getBrandCount(user.id),
+      prisma.post.count({ where: { brand: { userId: user.id } } }),
+      prisma.schedule.count({
+        where: { brand: { userId: user.id }, status: "scheduled" },
+      }),
+      prisma.post.count({
+        where: { brand: { userId: user.id }, status: "published" },
+      }),
+      prisma.platformAccount.count({
+        where: { userId: user.id, status: "connected" },
+      }),
+    ]);
 
   const quickStats = [
     { label: "Brands", value: String(brandCount), icon: Building2 },
-    { label: "Posts generated", value: "0", icon: Activity },
-    { label: "Scheduled", value: "0", icon: Calendar },
-    { label: "Published", value: "0", icon: Send },
+    { label: "Posts", value: String(postCount), icon: Activity },
+    { label: "Scheduled", value: String(scheduledCount), icon: Calendar },
+    { label: "Published", value: String(publishedCount), icon: Send },
+    { label: "Connected", value: String(accountCount), icon: Link2 },
   ];
 
   return (
@@ -44,7 +60,7 @@ export default async function DashboardPage() {
       />
 
       <Badge variant="secondary" className="w-fit">
-        Phase 6 — Brands
+        Generate, schedule &amp; publish
       </Badge>
 
       <InstallPrompt />
@@ -72,7 +88,7 @@ export default async function DashboardPage() {
         </Card>
       ) : null}
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {quickStats.map((stat) => (
           <Card key={stat.label}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
