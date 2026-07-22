@@ -1,0 +1,34 @@
+---
+description: PostPylot cost discipline — open-source first, free tiers, low operating cost
+alwaysApply: true
+---
+
+# PostPylot — Cost Principles
+
+Target: **$0–15/month** for the MVP. Optimize for effective results at near-zero cost by
+using open-source, self-hosted, and free-tier technology wherever feasible. See
+[`docs/CONSTITUTION.md`](../../docs/CONSTITUTION.md) and [`docs/adr/`](../../docs/adr/).
+
+## Default to free / open-source
+
+- **Jobs:** pg-boss on the existing Supabase Postgres. No paid queue. No cron in the app
+  runtime. (ADR 001)
+- **TTS:** Piper (MVP) → Kokoro (quality) self-hosted. ElevenLabs is opt-in premium only.
+  (ADR 002)
+- **Captions:** local Whisper (e.g. whisper.cpp) in the worker. No paid transcription.
+- **Images:** Satori + Resvg + Sharp template graphics. No paid image APIs in MVP.
+- **Video:** Remotion + FFmpeg in the worker. No paid render services.
+- **LLM:** Gemini free/cheap tier first, OpenAI fallback. Batch and cache to cut tokens.
+- **Hosting:** Vercel free tier (web) + one small always-on worker host.
+- **Data/Storage/Auth:** Supabase free tier (Postgres, Storage, Auth, RLS).
+
+## Rules
+
+- Prefer self-host over managed paid services until quality or scale genuinely forces an
+  upgrade — and record that upgrade in an ADR.
+- Never add a paid dependency by default. If a paid path exists, make it opt-in and keep a
+  free default working.
+- Cache and reuse AI output, media, and analytics pulls. Avoid re-generating identical
+  content; dedupe topics.
+- Respect provider free-tier limits (rate limits, batch sizes) in agent and job design.
+- When proposing a new dependency, state its cost and the free alternative you rejected.

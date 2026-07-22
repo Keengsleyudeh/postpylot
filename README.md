@@ -42,9 +42,16 @@ Open [http://localhost:3000](http://localhost:3000).
 ```text
 postpylot/
   apps/web/          # Next.js PWA frontend
-  packages/          # Shared packages (future)
+  packages/db/       # Prisma schema (exists)
+  packages/          # ai, platforms, shared (added per phase)
+  docs/              # CONSTITUTION.md + ADRs (north star)
   .cursor/rules/     # AI agent instructions
 ```
+
+## Architecture & Decisions
+
+- North star: [docs/CONSTITUTION.md](./docs/CONSTITUTION.md)
+- Decision records: [docs/adr/](./docs/adr/) (jobs, TTS, package manager, architecture)
 
 ## Build Phases
 

@@ -10,6 +10,10 @@ Design direction: **"Utility meets luxury."** Pro-tool density and precision on 
 dashboard; cinematic drama on the landing. OLED black canvas, high-voltage neon lime
 accent, generous rounded cards.
 
+Premium references for feel and interaction quality: Linear, Vercel, Raycast, Notion,
+Framer, Stripe. Borrow their polish and restraint — do NOT replace PostPylot's established
+brand system (OLED black + lime, Syne/Jakarta) with theirs.
+
 ## Color Palette
 
 Neon lime on OLED black. **Never reintroduce blue, cyan, or purple as brand colors.**
@@ -81,8 +85,11 @@ Show X/Twitter as "Coming later".
 
 ## Landing Animation Rules
 
-- Framer Motion for entrances; GSAP for complex scroll triggers; Lenis for smooth scroll.
+- Motion (Framer Motion) for entrances; GSAP for complex scroll triggers; Lenis for smooth scroll.
 - Lazy-load heavy animation; no layout shift; respect `prefers-reduced-motion`.
+- Phase-gated (not MVP): Lottie for small looping/empty-state animations, Rive for
+  interactive onboarding illustrations/mascots, Konva for the thumbnail/graphic editor, and
+  a command palette. Do not add these until their phase.
 - Cinematic black + lime bloom: glassmorphism cards, lime glow orbs, floating dashboard
   preview. Glow uses lime (`rgba(200,255,0,...)`), never blue/cyan/violet.
 

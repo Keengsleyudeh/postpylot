@@ -9,9 +9,19 @@ AI-powered social media automation SaaS. Generate, schedule, publish, and track 
 | Product | PostPylot |
 | Tagline | Your AI content engine on autopilot |
 | First milestone | Landing + SSO + PWA + Dashboard shell + Brand setup |
-| Auth | Supabase (Google SSO first) |
-| AI | Gemini primary, OpenAI fallback |
+| Auth | Supabase (Google SSO first; others later) |
+| AI | Gemini primary, OpenAI fallback (Anthropic later) |
+| Jobs | pg-boss on Supabase Postgres, separate worker |
+| Voice | Piper → Kokoro (self-host); ElevenLabs opt-in premium |
 | Worker | Separate process for video render + publish jobs |
+| Cost target | $0–15/month (open-source, free tiers first) |
+
+## North Star
+
+The reconciled constitution and stack decisions live in
+[`docs/CONSTITUTION.md`](./docs/CONSTITUTION.md); contested choices are recorded as ADRs in
+[`docs/adr/`](./docs/adr/). When a rule and the constitution/ADR disagree, the
+constitution/ADR wins.
 
 ## Cursor Rules
 
@@ -24,6 +34,7 @@ Detailed instructions live in `.cursor/rules/`:
 | `postpylot-ui.mdc` | Design system, landing sections, animation rules |
 | `postpylot-data.mdc` | Prisma schema, brand profile, quality gates |
 | `postpylot-integrations.mdc` | Platform OAuth, publishing, jobs, automation |
+| `postpylot-cost.mdc` | Cost discipline — open-source first, free tiers |
 
 ## Build Sequence
 
@@ -34,11 +45,12 @@ Detailed instructions live in `.cursor/rules/`:
 5. Dashboard shell (all routes + empty states)
 6. Database + brand onboarding
 7. AI content generation
-8. Media generation (images + videos in worker)
+8. Media generation (images + videos in worker; Piper voice, Whisper captions)
 9. Platform connections
 10. Publishing
 11. Automation (pg-boss)
 12. Analytics
+13+. Templates, organizations, subscriptions, extra platforms, extra SSO providers
 
 ## Critical Constraints
 

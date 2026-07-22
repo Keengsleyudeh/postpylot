@@ -10,6 +10,14 @@ alwaysApply: false
 
 `users`, `brands`, `platform_accounts`, `content_ideas`, `posts`, `videos`, `schedules`, `analytics`, `agent_logs`, `automation_rules`, `notifications`, `media_assets`
 
+`workflows` from the product vision map to the existing `automation_rules` — do not add a
+duplicate concept.
+
+## Roadmap Tables (post-MVP, do not add yet)
+
+- `templates` — reusable Remotion/Satori templates (add when the media phase needs them).
+- `organizations`, `subscriptions` — multi-tenant + billing (Phase 13+).
+
 ## Enums
 
 ```prisma
@@ -26,6 +34,8 @@ enum AspectRatio { horizontal_16_9 vertical_9_16 square_1_1 }
 - Encrypt `access_token` and `refresh_token` before storage — never store raw tokens.
 - Store platform metadata and agent I/O as JSON for debugging.
 - AI generation requires at least one brand profile.
+- Every table has `id`, `createdAt`, `updatedAt`, indexes, and foreign keys. Use soft
+  delete where appropriate (brands, media assets) — never for auth `users`.
 
 ## Brand Profile Fields
 

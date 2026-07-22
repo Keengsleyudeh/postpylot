@@ -8,8 +8,14 @@ alwaysApply: false
 
 ## Auth vs Publishing
 
-Supabase SSO (Google/GitHub/LinkedIn/Facebook) is **app login only**.  
-Each platform needs separate OAuth for publishing permissions.
+Supabase SSO is **app login only** — Google first; GitHub/Microsoft/Facebook/Apple added
+only when needed. This is separate from publishing OAuth.
+Each platform needs its own OAuth for publishing permissions.
+
+Every platform's OAuth implements: connect route, callback route, disconnect route, and a
+refresh-token handler. Store encrypted access token, encrypted refresh token, expiration,
+scopes, and platform account info. Validate OAuth `state` (CSRF). Tokens belong to users
+and are never exposed to the frontend.
 
 ## Platform Requirements
 
@@ -24,7 +30,7 @@ Use `googleapis` for YouTube. TikTok via secure HTTP (no SDK required). No brows
 
 ## Video Pipeline (worker)
 
-Topic → Script → Voice-over (Piper) → Scenes → Captions → Render (Remotion/FFmpeg) → Thumbnail → Store → Publish → Log
+Topic → Script → Voice-over (Piper, then Kokoro) → Scenes → Captions (local Whisper) → Render (Remotion/FFmpeg) → Thumbnail → Store → Publish → Log
 
 **YouTube:** 60–180s, 16:9, voice-over, kinetic text, captions, intro/outro, CTA.  
 **TikTok:** 15–60s, 9:16, fast hook, big captions, light branding, original content.
@@ -47,4 +53,6 @@ Content generated, scheduled, video rendered, published, failed, token expired, 
 
 ## Cost Target
 
-$0–15/month: Supabase free tier, Vercel free tier, Gemini first, Piper TTS, template images, GitHub Actions cron.
+$0–15/month: Supabase free tier, Vercel free tier, Gemini first, Piper/Kokoro self-hosted
+TTS, local Whisper captions, template images, pg-boss on the existing Postgres. See
+`postpylot-cost.mdc`.

@@ -17,20 +17,30 @@ postpylot/
   packages/shared/       # types, constants, utils
 ```
 
-Start as a single Next.js app if needed; evolve into this structure.
+**Hybrid monorepo** — packages by concern (above) plus domain folders inside the web app
+(e.g. `lib/brands` + `components/brands`). Do NOT rewrite the web app into `src/features/*`.
+Cross-cutting logic that both web and worker need lives in a package; web-only logic lives
+in the app's domain folders. See [ADR 004](../../docs/adr/004-architecture-hybrid-monorepo.md).
+
+Today only `apps/web` and `packages/db` exist. Create the other packages/worker as their
+phases arrive; evolve into this structure incrementally.
 
 ## Stack
 
 | Layer | Choice |
 |-------|--------|
-| Frontend | Next.js App Router, React, TS, Tailwind, shadcn/ui |
-| Animation (landing) | Framer Motion, GSAP, Lenis, typewriter-effect, react-countup |
-| Animation (dashboard) | Subtle Framer Motion only |
-| Backend | Next.js route handlers, Supabase, Prisma, PostgreSQL |
-| Jobs | pg-boss; GitHub Actions for early cron; separate worker process |
-| AI | `@google/genai` primary, `openai` fallback |
-| Images | Satori, @resvg/resvg-js, Sharp |
-| Video | Remotion, FFmpeg, Piper TTS (worker only) |
+| Framework | Next.js 16 (App Router), React 19, TypeScript. Do NOT downgrade to 15 |
+| Package manager | npm workspaces (not pnpm — [ADR 003](../../docs/adr/003-package-manager-npm.md)) |
+| Frontend | Tailwind, shadcn/ui, Lucide |
+| Animation (landing) | Motion (Framer Motion), GSAP, Lenis, typewriter-effect, react-countup |
+| Animation (dashboard) | Subtle Motion only |
+| Deferred UI | Lottie (empty states), Rive (onboarding), Konva (thumbnail editor), command palette — phase-gated |
+| Backend | Route Handlers (OAuth, webhooks, jobs) + Server Actions (UI mutations); Supabase, Prisma, PostgreSQL |
+| Jobs | pg-boss on the existing Postgres; separate worker process. No cron in the app runtime — pg-boss owns schedules; GitHub Actions only as an early external trigger if ever needed ([ADR 001](../../docs/adr/001-jobs-pg-boss.md)) |
+| AI | `@google/genai` primary, `openai` fallback (Anthropic later) |
+| Images | Satori, @resvg/resvg-js, Sharp (template-based; no paid image APIs in MVP) |
+| Video | Remotion, FFmpeg (worker only) |
+| Voice / Captions | Piper → Kokoro (self-host), ElevenLabs opt-in premium; local Whisper for captions ([ADR 002](../../docs/adr/002-tts-piper-kokoro.md)) |
 | Charts | recharts |
 
 ## Worker Responsibilities (never in frontend)
@@ -39,7 +49,10 @@ Scheduled jobs, AI batch generation, image/thumbnail render, voice-over, video r
 
 ## AI Agents (structured functions in MVP)
 
-Topic, Research, Writer, Short-Form Video, YouTube Script, Thumbnail, Voice, Video, Publisher, Analytics, Quality Control.
+Nine focused agents: Research, Topic, Writer, Image, Voice, Video, Publishing, Analytics,
+Quality Control. Fold short-form/YouTube-script generation into Writer, and thumbnails into
+Image, to avoid agent sprawl. See the agent table in
+[`docs/CONSTITUTION.md`](../../docs/CONSTITUTION.md).
 
 Return **structured JSON** when the app needs fields — not unstructured prose.
 
