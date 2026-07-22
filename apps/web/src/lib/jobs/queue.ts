@@ -39,6 +39,8 @@ async function getBoss(): Promise<PgBoss> {
     globalForBoss.__postpylotBoss = boss.start().then(async () => {
       await boss.createQueue(JOB.publishPost).catch(() => {});
       await boss.createQueue(JOB.runAutomationRule).catch(() => {});
+      await boss.createQueue(JOB.renderVideo).catch(() => {});
+      await boss.createQueue(JOB.publishVideo).catch(() => {});
       return boss;
     });
   }
@@ -60,4 +62,21 @@ export async function enqueuePublishPost(
 export async function enqueueRunAutomationRule(ruleId: string): Promise<void> {
   const boss = await getBoss();
   await boss.send(JOB.runAutomationRule, { ruleId });
+}
+
+export async function enqueueRenderVideo(videoId: string): Promise<void> {
+  const boss = await getBoss();
+  await boss.send(JOB.renderVideo, { videoId });
+}
+
+export async function enqueuePublishVideo(
+  scheduleId: string,
+  startAfter?: Date
+): Promise<void> {
+  const boss = await getBoss();
+  await boss.send(
+    JOB.publishVideo,
+    { scheduleId },
+    startAfter ? { startAfter } : {}
+  );
 }

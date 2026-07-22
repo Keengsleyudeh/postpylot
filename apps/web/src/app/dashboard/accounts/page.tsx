@@ -15,7 +15,9 @@ export const metadata: Metadata = {
   title: "Accounts",
 };
 
-const VIDEO_FIRST: Platform[] = ["youtube", "tiktok"];
+// TikTok is still video-pipeline gated; YouTube is now connectable when its
+// OAuth app is configured (Phase 9).
+const VIDEO_FIRST: Platform[] = ["tiktok"];
 
 export default async function AccountsPage({
   searchParams,

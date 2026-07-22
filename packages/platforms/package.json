@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@postpylot/db": "*",
-    "@postpylot/shared": "*"
+    "@postpylot/shared": "*",
+    "googleapis": "^144.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",

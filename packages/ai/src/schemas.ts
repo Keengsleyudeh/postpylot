@@ -28,6 +28,20 @@ export const qualityScoreSchema = z.object({
   approved: z.boolean(),
 });
 
+export const videoSceneSchema = z.object({
+  narration: z.string().min(1).max(800),
+  onScreenText: z.string().min(1).max(120),
+  durationSeconds: z.number().min(2).max(20),
+});
+
+export const youtubeScriptSchema = z.object({
+  title: z.string().min(1).max(100),
+  description: z.string().min(1).max(4000),
+  tags: z.array(z.string().min(1).max(60)).max(15).default([]),
+  scenes: z.array(videoSceneSchema).min(2).max(12),
+});
+
 export type TopicSuggestionParsed = z.infer<typeof topicSuggestionSchema>;
 export type GeneratedPostParsed = z.infer<typeof generatedPostSchema>;
 export type QualityScoreParsed = z.infer<typeof qualityScoreSchema>;
+export type YouTubeScriptParsed = z.infer<typeof youtubeScriptSchema>;

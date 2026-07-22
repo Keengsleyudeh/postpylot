@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     "pg-boss",
     "@resvg/resvg-js",
     "sharp",
+    "googleapis",
   ],
 };
 

@@ -3,7 +3,8 @@ import type { Platform } from "@postpylot/shared";
 import { facebookService } from "./facebook";
 import { linkedinService } from "./linkedin";
 import type { PlatformService } from "./types";
-import { tiktokService, youtubeService } from "./video-platforms";
+import { tiktokService } from "./video-platforms";
+import { youtubeService } from "./youtube";
 
 const SERVICES: Record<Platform, PlatformService> = {
   linkedin: linkedinService,

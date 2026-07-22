@@ -31,3 +31,19 @@ export type GeneratedDraft = {
   post: GeneratedPost;
   quality: QualityScore;
 };
+
+// A single narrated scene in a generated video script. `durationSeconds` drives
+// the Remotion timeline and the pacing of on-screen kinetic text.
+export type VideoScene = {
+  narration: string;
+  onScreenText: string;
+  durationSeconds: number;
+};
+
+// Structured YouTube video script produced by the Writer agent (video mode).
+export type YouTubeScript = {
+  title: string;
+  description: string;
+  tags: string[];
+  scenes: VideoScene[];
+};

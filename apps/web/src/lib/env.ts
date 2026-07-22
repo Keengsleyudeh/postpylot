@@ -20,6 +20,8 @@ export const env = createEnv({
     LINKEDIN_CLIENT_SECRET: z.string().optional(),
     FACEBOOK_CLIENT_ID: z.string().optional(),
     FACEBOOK_CLIENT_SECRET: z.string().optional(),
+    YOUTUBE_CLIENT_ID: z.string().optional(),
+    YOUTUBE_CLIENT_SECRET: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z
@@ -43,6 +45,8 @@ export const env = createEnv({
     LINKEDIN_CLIENT_SECRET: process.env.LINKEDIN_CLIENT_SECRET,
     FACEBOOK_CLIENT_ID: process.env.FACEBOOK_CLIENT_ID,
     FACEBOOK_CLIENT_SECRET: process.env.FACEBOOK_CLIENT_SECRET,
+    YOUTUBE_CLIENT_ID: process.env.YOUTUBE_CLIENT_ID,
+    YOUTUBE_CLIENT_SECRET: process.env.YOUTUBE_CLIENT_SECRET,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,

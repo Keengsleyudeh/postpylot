@@ -33,6 +33,22 @@ export type PublishResult = {
   url?: string;
 };
 
+// Input for uploading a rendered video to a video-first platform (YouTube).
+// `videoSource` is a local file path in the worker or an http(s) URL; the
+// service resolves it into an upload stream.
+export type PublishVideoInput = {
+  accessToken: string;
+  title: string;
+  description: string;
+  tags: string[];
+  videoSource: string;
+  thumbnailSource?: string | null;
+  privacyStatus?: "private" | "unlisted" | "public";
+  // Platform-specific target, e.g. the YouTube channel id.
+  externalId?: string | null;
+  metadata?: Record<string, unknown> | null;
+};
+
 export type AnalyticsInput = {
   accessToken: string;
   platformPostId: string;
@@ -63,7 +79,7 @@ export interface PlatformService {
     refreshToken: string
   ): Promise<ServiceResult<PlatformTokens>>;
   publishPost(input: PublishPostInput): Promise<ServiceResult<PublishResult>>;
-  publishVideo(input: PublishPostInput): Promise<ServiceResult<PublishResult>>;
+  publishVideo(input: PublishVideoInput): Promise<ServiceResult<PublishResult>>;
   getAnalytics(
     input: AnalyticsInput
   ): Promise<ServiceResult<AnalyticsMetric[]>>;

@@ -10,6 +10,7 @@ export {
   researchAgent,
   topicAgent,
   writerAgent,
+  youtubeScriptAgent,
   qualityControlAgent,
   generateDrafts,
 } from "./agents";

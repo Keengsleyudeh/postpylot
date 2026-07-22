@@ -4,6 +4,7 @@ import type {
   Platform,
   QualityScore,
   TopicSuggestion,
+  YouTubeScript,
 } from "@postpylot/shared";
 
 import { generateJson } from "./client";
@@ -12,14 +13,17 @@ import {
   QUALITY_SYSTEM,
   TOPIC_SYSTEM,
   WRITER_SYSTEM,
+  YOUTUBE_SCRIPT_SYSTEM,
   qualityPrompt,
   topicPrompt,
   writerPrompt,
+  youtubeScriptPrompt,
 } from "./prompts";
 import {
   generatedPostSchema,
   qualityScoreSchema,
   topicSuggestionSchema,
+  youtubeScriptSchema,
 } from "./schemas";
 import type { BrandContext, GenerateRequest } from "./types";
 
@@ -67,6 +71,22 @@ export async function writerAgent(
       // Trust our platform target over whatever the model echoed back.
       return { ...parsed, platform } satisfies GeneratedPost;
     }
+  );
+}
+
+// Writer Agent (video mode) — writes a YouTube video script for a topic.
+export async function youtubeScriptAgent(
+  brand: BrandContext,
+  topic: TopicSuggestion
+): Promise<YouTubeScript> {
+  return withAgentLog(
+    { agent: "writer-video", brandId: brand.id, input: { topic: topic.title } },
+    () =>
+      generateJson(
+        youtubeScriptSchema,
+        YOUTUBE_SCRIPT_SYSTEM,
+        youtubeScriptPrompt(brand, topic)
+      )
   );
 }
 

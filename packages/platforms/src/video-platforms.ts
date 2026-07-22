@@ -8,10 +8,10 @@ import type {
   PublishResult,
 } from "./types";
 
-// YouTube and TikTok are video-first platforms. Their OAuth + upload flows are
-// implemented alongside the Remotion/FFmpeg video pipeline (Phase 8). Until then
-// every action returns a typed `unsupported` result so the app never fakes a
-// connection or a publish.
+// TikTok is a video-first platform whose OAuth + Content Posting API flow is
+// implemented alongside the video pipeline in a later phase. Until then every
+// action returns a typed `unsupported` result so the app never fakes a
+// connection or a publish. (YouTube is now implemented in ./youtube.)
 function createVideoFirstService(
   platform: Platform,
   label: string
@@ -34,5 +34,4 @@ function createVideoFirstService(
   };
 }
 
-export const youtubeService = createVideoFirstService("youtube", "YouTube");
 export const tiktokService = createVideoFirstService("tiktok", "TikTok");

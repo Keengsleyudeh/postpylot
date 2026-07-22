@@ -9,14 +9,27 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@postpylot/ai": "*",
     "@postpylot/db": "*",
     "@postpylot/platforms": "*",
     "@postpylot/shared": "*",
+    "@remotion/bundler": "4.0.496",
+    "@remotion/renderer": "4.0.496",
+    "@resvg/resvg-js": "^2.6.2",
+    "@supabase/supabase-js": "^2.110.1",
     "dotenv": "^16.4.7",
-    "pg-boss": "^10.1.5"
+    "ffmpeg-static": "^5.2.0",
+    "pg-boss": "^10.1.5",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "remotion": "4.0.496",
+    "satori": "^0.12.1",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "tsx": "^4.19.2",
     "typescript": "^5"
   }

@@ -9,4 +9,5 @@ export { encodeState, decodeState, type OAuthState } from "./state";
 export { getPlatformService, listPlatformServices } from "./registry";
 export { linkedinService } from "./linkedin";
 export { facebookService } from "./facebook";
-export { youtubeService, tiktokService } from "./video-platforms";
+export { youtubeService } from "./youtube";
+export { tiktokService } from "./video-platforms";
