@@ -10,8 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "Your AI content engine on autopilot. Generate, schedule, publish, and track content across YouTube, TikTok, LinkedIn, and Facebook.",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#050B18",
-    theme_color: "#050B18",
+    background_color: "#0A0A0A",
+    theme_color: "#0A0A0A",
     orientation: "portrait",
     icons: [
       ...ICON_SIZES.map((size) => ({

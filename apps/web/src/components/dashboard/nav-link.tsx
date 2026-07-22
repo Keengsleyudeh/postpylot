@@ -28,14 +28,22 @@ export function NavLink({
       href={href}
       onClick={onNavigate}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
         active
           ? "bg-sidebar-accent text-sidebar-accent-foreground"
-          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+          : "text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
       )}
       aria-current={active ? "page" : undefined}
     >
-      <Icon className="size-4 shrink-0" aria-hidden />
+      <Icon
+        className={cn(
+          "size-4 shrink-0 transition-colors",
+          active
+            ? "text-primary"
+            : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground"
+        )}
+        aria-hidden
+      />
       {label}
     </Link>
   );

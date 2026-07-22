@@ -34,7 +34,7 @@ const optionalText = z
 const hexColor = z
   .string()
   .trim()
-  .regex(/^#([0-9a-fA-F]{6})$/, "Use a 6-digit hex color, e.g. #2563EB.");
+  .regex(/^#([0-9a-fA-F]{6})$/, "Use a 6-digit hex color, e.g. #C8FF00.");
 
 // Full brand payload shared by create and edit flows.
 export const brandFormSchema = z.object({

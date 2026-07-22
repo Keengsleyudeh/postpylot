@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PostPylotLogo } from "@/components/brand/postpylot-logo";
 import { GlassCard } from "@/components/landing/glass-card";
 
 export function AuthCard({ children }: { children: React.ReactNode }) {
@@ -12,9 +13,10 @@ export function AuthCard({ children }: { children: React.ReactNode }) {
       <div className="relative w-full max-w-sm space-y-8">
         <Link
           href="/"
-          className="block text-center font-heading text-xl font-bold tracking-tight"
+          className="flex justify-center"
+          aria-label="PostPylot home"
         >
-          <span className="text-postpylot-gradient">PostPylot</span>
+          <PostPylotLogo size="lg" decorative />
         </Link>
 
         <GlassCard className="space-y-6 p-8">{children}</GlassCard>

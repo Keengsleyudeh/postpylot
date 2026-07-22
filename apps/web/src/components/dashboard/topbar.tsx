@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { DashboardUser } from "@/lib/auth/get-dashboard-user";
 import { getPageTitle } from "@/lib/dashboard/navigation";
 
@@ -20,7 +21,7 @@ function UserAvatar({ user }: { user: DashboardUser }) {
   }
 
   return (
-    <div className="flex size-8 items-center justify-center rounded-full bg-postpylot-gradient text-xs font-semibold text-white">
+    <div className="flex size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
       {user.displayName.charAt(0).toUpperCase()}
     </div>
   );
@@ -57,6 +58,7 @@ export function Topbar({
         <div className="sm:hidden">
           <UserAvatar user={user} />
         </div>
+        <ThemeToggle />
         <LogoutButton />
       </div>
     </header>

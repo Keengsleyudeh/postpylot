@@ -20,11 +20,11 @@ function iconSvg(size, maskable = false) {
   const radius = maskable ? 0 : Math.round(size * 0.18);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <rect width="${size}" height="${size}" rx="${radius}" fill="#050B18"/>
+  <rect width="${size}" height="${size}" rx="${radius}" fill="#0A0A0A"/>
   <defs>
     <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#2563EB"/>
-      <stop offset="100%" stop-color="#22D3EE"/>
+      <stop offset="0%" stop-color="#C8FF00"/>
+      <stop offset="100%" stop-color="#E8FF66"/>
     </linearGradient>
   </defs>
   <text

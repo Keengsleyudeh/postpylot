@@ -27,6 +27,7 @@ You are building **PostPylot**, an AI-powered social media automation SaaS for K
 10. Add loading, error, empty, and success states. Respect `prefers-reduced-motion`.
 11. Landing page = cinematic; dashboard = clean, fast, subtle animation only.
 12. Do not create unmarked placeholder code. Use typed stubs with clear TODOs when APIs are untestable.
+13. Brand look = OLED black + neon lime (`#C8FF00`), Syne + Plus Jakarta Sans fonts. Support light + dark mode via CSS variables. Never use blue/cyan/purple as brand colors. See `postpylot-ui.mdc`.
 
 ## Build Order (follow sequentially)
 

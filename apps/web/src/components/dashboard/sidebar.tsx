@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PostPylotLogo } from "@/components/brand/postpylot-logo";
 import { NavLink } from "@/components/dashboard/nav-link";
 import {
   DASHBOARD_NAV,
@@ -12,9 +13,10 @@ export function Sidebar() {
       <div className="flex h-14 items-center border-b border-sidebar-border px-4">
         <Link
           href="/dashboard"
-          className="font-heading text-lg font-bold tracking-tight"
+          className="inline-flex items-center"
+          aria-label="PostPylot dashboard"
         >
-          <span className="text-postpylot-gradient">PostPylot</span>
+          <PostPylotLogo size="md" decorative />
         </Link>
       </div>
 

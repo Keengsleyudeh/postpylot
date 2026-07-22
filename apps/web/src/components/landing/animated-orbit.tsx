@@ -36,7 +36,7 @@ export function AnimatedOrbit({ className }: { className?: string }) {
       aria-hidden
     >
       <div className="glow-orb absolute inset-0 blur-3xl" />
-      <div className="absolute left-1/2 top-1/2 size-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/30 bg-primary/10 shadow-[0_0_60px_rgba(37,99,235,0.4)]" />
+      <div className="absolute left-1/2 top-1/2 size-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/30 bg-primary/10 shadow-[0_0_60px_rgba(200,255,0,0.35)]" />
       <div className="absolute left-1/2 top-1/2 size-48 -translate-x-1/2 -translate-y-1/2 rounded-full border border-accent/20" />
       <div className="absolute left-1/2 top-1/2 size-72 -translate-x-1/2 -translate-y-1/2 rounded-full border border-secondary/10" />
 

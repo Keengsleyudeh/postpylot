@@ -3,6 +3,7 @@
 import { Download, X } from "lucide-react";
 import { useState } from "react";
 
+import { PostPylotLogo } from "@/components/brand/postpylot-logo";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -41,6 +42,9 @@ export function InstallPrompt() {
         >
           <X aria-hidden />
         </Button>
+        <div className="mb-2">
+          <PostPylotLogo variant="mark" size="lg" decorative />
+        </div>
         <CardTitle className="pr-8">Install PostPylot</CardTitle>
         <CardDescription>
           Add PostPylot to your home screen for quick access to your content

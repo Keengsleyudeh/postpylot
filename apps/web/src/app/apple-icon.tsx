@@ -13,14 +13,14 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#050B18",
+          background: "#0A0A0A",
         }}
       >
         <div
           style={{
             fontSize: 96,
             fontWeight: 700,
-            background: "linear-gradient(135deg, #2563EB 0%, #22D3EE 100%)",
+            background: "linear-gradient(135deg, #C8FF00 0%, #E8FF66 100%)",
             backgroundClip: "text",
             color: "transparent",
           }}

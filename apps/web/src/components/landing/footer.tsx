@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { PostPylotLogo } from "@/components/brand/postpylot-logo";
+
 const footerLinks = [
   { label: "Problem", href: "#problem" },
   { label: "Pipeline", href: "#pipeline" },
@@ -14,9 +16,7 @@ export function Footer() {
       <div className="landing-container py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-3 sm:col-span-2">
-            <p className="font-heading text-lg font-bold">
-              <span className="text-postpylot-gradient">PostPylot</span>
-            </p>
+            <PostPylotLogo size="md" />
             <p className="max-w-sm text-sm text-muted-foreground">
               Your AI content engine on autopilot. Generate, schedule, publish,
               and track content across YouTube, TikTok, LinkedIn, and Facebook.

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Typewriter from "typewriter-effect";
 
+import { PostPylotLogo } from "@/components/brand/postpylot-logo";
 import { GlassCard } from "@/components/landing/glass-card";
 import { Button } from "@/components/ui/button";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
@@ -74,9 +75,12 @@ export function HeroSection() {
           variants={variants}
           className="space-y-6 text-center lg:text-left"
         >
-          <p className="font-mono text-xs uppercase tracking-widest text-accent">
-            AI content autopilot
-          </p>
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5">
+            <PostPylotLogo variant="mark" size="sm" decorative />
+            <span className="font-mono text-xs uppercase tracking-widest text-primary">
+              PostPylot — AI content autopilot
+            </span>
+          </div>
           <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
             Your AI content engine on{" "}
             <span className="text-postpylot-gradient">autopilot</span>.

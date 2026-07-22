@@ -21,9 +21,9 @@ export function FinalCTA() {
           variants={variants}
           className="relative overflow-hidden rounded-2xl bg-postpylot-gradient p-px"
         >
-          <div className="relative rounded-[15px] bg-card px-6 py-12 text-center sm:px-12 sm:py-16">
+          <div className="relative rounded-[calc(var(--radius)*1.7-1px)] bg-card px-6 py-12 text-center sm:px-12 sm:py-16">
             <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(34,211,238,0.12),transparent_50%)]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(200,255,0,0.12),transparent_50%)]"
               aria-hidden
             />
             <div className="relative space-y-6">

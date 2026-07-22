@@ -43,7 +43,7 @@ export default async function AuthSettingsPage() {
                 className="size-12 rounded-full ring-1 ring-border"
               />
             ) : (
-              <div className="flex size-12 items-center justify-center rounded-full bg-postpylot-gradient text-lg font-semibold text-white">
+              <div className="flex size-12 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground">
                 {user.displayName.charAt(0).toUpperCase()}
               </div>
             )}

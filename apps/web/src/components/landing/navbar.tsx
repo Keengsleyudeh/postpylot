@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { PostPylotLogo } from "@/components/brand/postpylot-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -24,11 +25,8 @@ export function Navbar() {
         className="landing-container flex h-16 items-center justify-between"
         aria-label="Main navigation"
       >
-        <Link
-          href="/"
-          className="font-heading text-lg font-bold tracking-tight"
-        >
-          <span className="text-postpylot-gradient">PostPylot</span>
+        <Link href="/" className="inline-flex items-center" aria-label="PostPylot home">
+          <PostPylotLogo size="md" decorative />
         </Link>
 
         <ul className="hidden items-center gap-8 md:flex">

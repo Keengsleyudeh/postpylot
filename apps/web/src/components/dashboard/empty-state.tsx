@@ -33,8 +33,8 @@ export function EmptyState({
         className
       )}
     >
-      <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-muted">
-        <Icon className="size-6 text-muted-foreground" aria-hidden />
+      <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+        <Icon className="size-6 text-primary" aria-hidden />
       </div>
       <h2 className="font-heading text-lg font-semibold">{title}</h2>
       <p className="mt-2 max-w-md text-sm text-muted-foreground">

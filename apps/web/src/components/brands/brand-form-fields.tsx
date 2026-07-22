@@ -259,7 +259,7 @@ export function BrandPreferencesFields({ state, onChange, errors }: SectionProps
                 <input
                   type="color"
                   aria-label={`Brand color ${index + 1}`}
-                  value={/^#[0-9a-fA-F]{6}$/.test(current) ? current : "#2563eb"}
+                  value={/^#[0-9a-fA-F]{6}$/.test(current) ? current : "#c8ff00"}
                   onChange={(event) => {
                     const next = [...state.brandColors];
                     next[index] = event.target.value;
@@ -274,7 +274,7 @@ export function BrandPreferencesFields({ state, onChange, errors }: SectionProps
                     next[index] = event.target.value;
                     onChange({ brandColors: next });
                   }}
-                  placeholder="#2563EB"
+                  placeholder="#C8FF00"
                   className="w-28"
                 />
               </div>

@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 
+import { PostPylotLogo } from "@/components/brand/postpylot-logo";
 import { NavLink } from "@/components/dashboard/nav-link";
 import {
   DASHBOARD_NAV,
@@ -67,10 +68,11 @@ export function MobileNav({
           <div className="flex h-14 items-center justify-between border-b border-sidebar-border px-4">
             <Link
               href="/dashboard"
-              className="font-heading text-lg font-bold tracking-tight"
+              className="inline-flex items-center"
+              aria-label="PostPylot dashboard"
               onClick={() => onOpenChange(false)}
             >
-              <span className="text-postpylot-gradient">PostPylot</span>
+              <PostPylotLogo size="md" decorative />
             </Link>
             <button
               type="button"

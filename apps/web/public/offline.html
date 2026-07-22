@@ -42,14 +42,26 @@
       }
 
       .logo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .logo img {
+        width: 1.75rem;
+        height: 1.75rem;
+      }
+
+      .logo span {
         font-size: 1.25rem;
         font-weight: 700;
         letter-spacing: -0.02em;
-        background: linear-gradient(135deg, #2563eb 0%, #22d3ee 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #22d3ee 50%, #8b5cf6 100%);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
-        margin-bottom: 1.5rem;
       }
 
       h1 {
@@ -92,7 +104,10 @@
   </head>
   <body>
     <main class="card">
-      <div class="logo">PostPylot</div>
+      <div class="logo">
+        <img src="/logo-mark.svg" alt="" width="28" height="28" />
+        <span>PostPylot</span>
+      </div>
       <h1>You&rsquo;re offline</h1>
       <p>
         PostPylot needs an internet connection to load new pages. Check your

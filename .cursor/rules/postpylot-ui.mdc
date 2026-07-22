@@ -6,35 +6,76 @@ alwaysApply: false
 
 # PostPylot — UI & Design
 
+Design direction: **"Utility meets luxury."** Pro-tool density and precision on the
+dashboard; cinematic drama on the landing. OLED black canvas, high-voltage neon lime
+accent, generous rounded cards.
+
 ## Color Palette
 
-| Token | Hex |
-|-------|-----|
-| Midnight Navy | `#050B18` |
-| Deep Space Blue | `#071A2F` |
-| Electric Blue | `#2563EB` |
-| Cyan Glow | `#22D3EE` |
-| Violet AI Accent | `#8B5CF6` |
-| Soft Gray | `#CBD5E1` |
-| Success | `#22C55E` |
-| Warning | `#F59E0B` |
-| Error | `#EF4444` |
+Neon lime on OLED black. **Never reintroduce blue, cyan, or purple as brand colors.**
+All colors are CSS variables in `apps/web/src/app/globals.css` — use tokens, not raw hex.
+
+| Role | Token | Dark (default) | Light |
+|------|-------|----------------|-------|
+| Canvas | `--background` | `#0A0A0A` | `#F5F5F5` |
+| Surface / card / sidebar | `--card` `--sidebar` | `#141414` | `#FFFFFF` |
+| Raised / muted | `--muted` | `#1A1A1A` | `#EEEEEE` |
+| Border / input | `--border` `--input` | `#2A2A2A` | `#E5E5E5` |
+| Primary (brand accent) | `--primary` | `#C8FF00` | `#C8FF00` |
+| On-primary | `--primary-foreground` | `#0A0A0A` | `#0A0A0A` |
+| Text | `--foreground` | `#FFFFFF` | `#0A0A0A` |
+| Secondary text | `--muted-foreground` | `#8A8A8A` | `#5C5C5C` |
+| Success | `--success` | `#22C55E` | `#16A34A` |
+| Warning | `--warning` | `#F59E0B` | `#D97706` |
+| Error | `--destructive` | `#EF4444` | `#DC2626` |
+
+- Brand accent (`#C8FF00`) is the single hero color. Use sparingly for emphasis: CTAs,
+  active states, key metrics, focus rings, glow.
+- **Primary CTAs = solid lime pill with black text** (`bg-primary text-primary-foreground`).
+- Brand gradient (`.bg-postpylot-gradient` / `.text-postpylot-gradient`) is lime →
+  `#E8FF66`. Use only for the logo mark and rare accents, not as a general background.
+- Platform brand colors (YouTube red, LinkedIn/Facebook blue) are allowed only on their
+  own platform icons.
+
+## Theming (light + dark)
+
+- Both themes are required. `next-themes` drives the `.dark` class (`attribute="class"`,
+  `defaultTheme="dark"`, `enableSystem`).
+- Provider: `apps/web/src/components/theme-provider.tsx`; toggle:
+  `apps/web/src/components/theme-toggle.tsx` (in the dashboard topbar).
+- Never hardcode `dark`-only colors in components. Use tokens so both themes work.
+- PWA `theme_color` / `background_color` = `#0A0A0A`; `viewport.themeColor` is
+  per-scheme (light `#F5F5F5`, dark `#0A0A0A`).
 
 ## Typography
 
-- Headings: **Space Grotesk** or **Sora**
-- Body: **Inter**
-- Technical/AI accent: **JetBrains Mono**
+Fonts load in `apps/web/src/app/layout.tsx` via `next/font/google`.
+
+- Display / headings: **Syne** (`--font-syne`, `font-heading`, applied to `h1–h6`)
+- Body / UI: **Plus Jakarta Sans** (`--font-jakarta`, `--font-sans`)
+- Technical / AI accent: **JetBrains Mono** (`--font-jetbrains-mono`, `font-mono`)
+- Headings use tight tracking (`-0.02em`). Do not fall back to Inter / system defaults.
+
+## Radius
+
+Base `--radius` is `1.25rem` — cards and controls are noticeably rounded (bento-box feel).
+Prefer `rounded-xl` / `rounded-2xl` on cards; pill (`rounded-full`) only for lime CTAs and chips.
 
 ## Landing Page (`/`) — 12 Sections
 
-Navbar → Hero → Problem → Solution Pipeline → Platforms → AI Video → TikTok → Dashboard Preview → Automation Rules → Pricing/Beta → Final CTA → Footer
+Navbar → Hero → Problem → Solution Pipeline → Platforms → AI Video → TikTok →
+Dashboard Preview → Automation Rules → Pricing/Beta → Final CTA → Footer
 
-**Hero copy:** "Your AI content engine on autopilot."  
-**Subcopy:** Generate, schedule, publish, and track across YouTube, TikTok, LinkedIn, and Facebook.  
+**Hero copy:** "Your AI content engine on autopilot."
+**Subcopy:** Generate, schedule, publish, and track across YouTube, TikTok, LinkedIn, and Facebook.
 **CTAs:** "Launch PostPylot" (→ `/login`), "Watch Demo"
 
-**Pipeline animation (scroll-triggered):** Topic → Research → Writer → Image/Thumbnail → Video → Scheduler → Publisher → Analytics
+- Hero is brand-first: PostPylot must read as a hero-level signal, one headline, one
+  supporting line, one CTA group, one dominant visual. No stat strips or floating badges
+  over hero media.
+
+**Pipeline animation (scroll-triggered):** Topic → Research → Writer → Image/Thumbnail →
+Video → Scheduler → Publisher → Analytics
 
 Show X/Twitter as "Coming later".
 
@@ -42,11 +83,15 @@ Show X/Twitter as "Coming later".
 
 - Framer Motion for entrances; GSAP for complex scroll triggers; Lenis for smooth scroll.
 - Lazy-load heavy animation; no layout shift; respect `prefers-reduced-motion`.
-- Glassmorphism cards, orbit/glow effects, floating dashboard preview.
+- Cinematic black + lime bloom: glassmorphism cards, lime glow orbs, floating dashboard
+  preview. Glow uses lime (`rgba(200,255,0,...)`), never blue/cyan/violet.
 
 ## Dashboard UI Rules
 
-- Solid clean cards (not glassmorphism); sidebar + topbar + mobile nav.
+- Pro-tool aesthetic modeled on high-end fintech/automotive dashboards: OLED/charcoal
+  surfaces, large rounded solid cards (not glassmorphism), slim icon sidebar.
+- Active nav item = **lime icon**; big bold metrics; lime CTAs with black text.
+- Sidebar + topbar + mobile nav; theme toggle in topbar.
 - Subtle card entrance, hover lift, skeleton loaders, progress bars, confetti on success.
 - No heavy 3D in dashboard. Mobile-first PWA layouts.
 
@@ -54,12 +99,16 @@ Show X/Twitter as "Coming later".
 
 ```ts
 { name: "PostPylot", short_name: "PostPylot", start_url: "/dashboard",
-  display: "standalone", theme_color: "#050B18", background_color: "#050B18",
+  display: "standalone", theme_color: "#0A0A0A", background_color: "#0A0A0A",
   orientation: "portrait" }
 ```
 
-Icons: `public/icons/icon-{72,96,128,144,152,192,384,512}x512.png`. Use branded placeholders if missing.
+Icons: `public/icons/icon-{72,96,128,144,152,192,384,512}x512.png`, generated from
+`public/icon.svg` + `public/icon-maskable.svg` via `scripts/generate-icons.mjs` (lime
+mark on `#0A0A0A`). Regenerate PNGs after changing the SVGs.
 
 ## Accessibility
 
-Semantic HTML, keyboard nav, visible focus, sufficient contrast, alt text, ARIA only when needed.
+Semantic HTML, keyboard nav, visible focus, sufficient contrast, alt text, ARIA only when
+needed. Lime `#C8FF00` on black passes contrast; on light surfaces use black text on lime,
+never lime text on white.
