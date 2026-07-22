@@ -1,0 +1,336 @@
+// PostPylot data model. See .cursor/rules/postpylot-data.mdc for the source of truth.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Platform {
+  youtube
+  tiktok
+  linkedin
+  facebook
+}
+
+enum ContentStatus {
+  draft
+  generated
+  scheduled
+  publishing
+  published
+  failed
+  cancelled
+}
+
+enum AccountStatus {
+  connected
+  expired
+  disconnected
+  error
+}
+
+enum AspectRatio {
+  horizontal_16_9
+  vertical_9_16
+  square_1_1
+}
+
+// A PostPylot account. `id` matches the Supabase auth user id.
+model User {
+  id          String  @id
+  email       String? @unique
+  displayName String? @map("display_name")
+  avatarUrl   String? @map("avatar_url")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  brands           Brand[]
+  platformAccounts PlatformAccount[]
+  notifications    Notification[]
+
+  @@map("users")
+}
+
+// A brand profile that powers AI content generation.
+model Brand {
+  id     String @id @default(cuid())
+  userId String @map("user_id")
+
+  name                  String
+  industry              String?
+  audience              String?
+  tone                  String?
+  websiteUrl            String?    @map("website_url")
+  offer                 String?
+  contentGoals          String[]   @map("content_goals")
+  preferredPlatforms    Platform[] @map("preferred_platforms")
+  postingFrequency      String?    @map("posting_frequency")
+  forbiddenTopics       String[]   @map("forbidden_topics")
+  preferredCta          String?    @map("preferred_cta")
+  brandColors           Json?      @map("brand_colors")
+  logoUrl               String?    @map("logo_url")
+  videoStylePreference  String?    @map("video_style_preference")
+  isDefault             Boolean    @default(false) @map("is_default")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentIdeas    ContentIdea[]
+  posts           Post[]
+  videos          Video[]
+  schedules       Schedule[]
+  analytics       Analytics[]
+  agentLogs       AgentLog[]
+  automationRules AutomationRule[]
+  mediaAssets     MediaAsset[]
+
+  @@index([userId])
+  @@map("brands")
+}
+
+// A connected social platform (publishing OAuth). Tokens are encrypted before storage.
+model PlatformAccount {
+  id     String @id @default(cuid())
+  userId String @map("user_id")
+
+  platform       Platform
+  status         AccountStatus @default(connected)
+  accountName    String?       @map("account_name")
+  externalId     String?       @map("external_id")
+  accessToken    String?       @map("access_token") @db.Text
+  refreshToken   String?       @map("refresh_token") @db.Text
+  tokenExpiresAt DateTime?     @map("token_expires_at")
+  scopes         String[]
+  metadata       Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform, externalId])
+  @@index([userId])
+  @@map("platform_accounts")
+}
+
+// A raw content idea produced by the Topic/Research agents.
+model ContentIdea {
+  id      String @id @default(cuid())
+  brandId String @map("brand_id")
+
+  title       String
+  description String?       @db.Text
+  topic       String?
+  status      ContentStatus @default(draft)
+  source      String?
+  metadata    Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  brand  Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  posts  Post[]
+  videos Video[]
+
+  @@index([brandId])
+  @@map("content_ideas")
+}
+
+// A text/image post for a single platform.
+model Post {
+  id      String  @id @default(cuid())
+  brandId String  @map("brand_id")
+  ideaId  String? @map("idea_id")
+
+  platform       Platform
+  status         ContentStatus @default(draft)
+  content        String        @db.Text
+  hashtags       String[]
+  platformPostId String?       @map("platform_post_id")
+  publishedAt    DateTime?     @map("published_at")
+  metadata       Json?
+
+  mediaAssetId String? @map("media_asset_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  brand      Brand        @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  idea       ContentIdea? @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+  mediaAsset MediaAsset?  @relation(fields: [mediaAssetId], references: [id], onDelete: SetNull)
+  schedules  Schedule[]
+  analytics  Analytics[]
+
+  @@index([brandId])
+  @@index([ideaId])
+  @@map("posts")
+}
+
+// A rendered short-form or long-form video.
+model Video {
+  id      String  @id @default(cuid())
+  brandId String  @map("brand_id")
+  ideaId  String? @map("idea_id")
+
+  platform        Platform
+  aspectRatio     AspectRatio   @map("aspect_ratio")
+  status          ContentStatus @default(draft)
+  title           String
+  description     String?       @db.Text
+  script          String?       @db.Text
+  durationSeconds Int?          @map("duration_seconds")
+  storagePath     String?       @map("storage_path")
+  platformVideoId String?       @map("platform_video_id")
+  publishedAt     DateTime?     @map("published_at")
+  metadata        Json?
+
+  thumbnailAssetId String? @map("thumbnail_asset_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  brand          Brand        @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  idea           ContentIdea? @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+  thumbnailAsset MediaAsset?  @relation(fields: [thumbnailAssetId], references: [id], onDelete: SetNull)
+  schedules      Schedule[]
+  analytics      Analytics[]
+
+  @@index([brandId])
+  @@index([ideaId])
+  @@map("videos")
+}
+
+// A scheduled publish slot for a post or video.
+model Schedule {
+  id      String  @id @default(cuid())
+  brandId String  @map("brand_id")
+  postId  String? @map("post_id")
+  videoId String? @map("video_id")
+
+  scheduledAt DateTime      @map("scheduled_at")
+  timezone    String        @default("UTC")
+  status      ContentStatus @default(scheduled)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  brand Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  post  Post?  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  video Video? @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@index([scheduledAt])
+  @@map("schedules")
+}
+
+// A single collected analytics metric for a post or video.
+model Analytics {
+  id      String  @id @default(cuid())
+  brandId String  @map("brand_id")
+  postId  String? @map("post_id")
+  videoId String? @map("video_id")
+
+  platform    Platform
+  metric      String
+  value       Float
+  collectedAt DateTime @default(now()) @map("collected_at")
+  raw         Json?
+
+  brand Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  post  Post?  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  video Video? @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("analytics")
+}
+
+// Structured input/output log for an AI agent run (debugging + auditing).
+model AgentLog {
+  id      String  @id @default(cuid())
+  brandId String? @map("brand_id")
+
+  agent      String
+  status     String
+  input      Json?
+  output     Json?
+  error      String? @db.Text
+  durationMs Int?    @map("duration_ms")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  brand Brand? @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("agent_logs")
+}
+
+// An automation rule (e.g. weekly LinkedIn post).
+model AutomationRule {
+  id      String @id @default(cuid())
+  brandId String @map("brand_id")
+
+  name        String
+  description String?
+  platform    Platform?
+  frequency   String
+  isActive    Boolean   @default(true) @map("is_active")
+  config      Json?
+  lastRunAt   DateTime? @map("last_run_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+  @@map("automation_rules")
+}
+
+// An in-app notification for the user.
+model Notification {
+  id     String @id @default(cuid())
+  userId String @map("user_id")
+
+  type     String
+  title    String
+  body     String?  @db.Text
+  isRead   Boolean  @default(false) @map("is_read")
+  metadata Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+// A stored media file (thumbnail, quote card, rendered clip) in Supabase Storage.
+model MediaAsset {
+  id      String @id @default(cuid())
+  brandId String @map("brand_id")
+
+  type        String
+  storagePath String  @map("storage_path")
+  url         String?
+  mimeType    String? @map("mime_type")
+  width       Int?
+  height      Int?
+  metadata    Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  brand           Brand   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  posts           Post[]
+  thumbnailVideos Video[]
+
+  @@index([brandId])
+  @@map("media_assets")
+}

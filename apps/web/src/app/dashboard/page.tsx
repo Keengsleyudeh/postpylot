@@ -13,16 +13,11 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { getDashboardUser } from "@/lib/auth/get-dashboard-user";
+import { getBrandCount } from "@/lib/brands/queries";
 
 export const metadata: Metadata = {
   title: "Overview",
 };
-
-const QUICK_STATS = [
-  { label: "Posts generated", value: "0", icon: Activity },
-  { label: "Scheduled", value: "0", icon: Calendar },
-  { label: "Published", value: "0", icon: Send },
-];
 
 const QUICK_LINKS = [
   { href: "/dashboard/brands", label: "Set up a brand", icon: Building2 },
@@ -32,6 +27,14 @@ const QUICK_LINKS = [
 
 export default async function DashboardPage() {
   const user = await getDashboardUser();
+  const brandCount = await getBrandCount(user.id);
+
+  const quickStats = [
+    { label: "Brands", value: String(brandCount), icon: Building2 },
+    { label: "Posts generated", value: "0", icon: Activity },
+    { label: "Scheduled", value: "0", icon: Calendar },
+    { label: "Published", value: "0", icon: Send },
+  ];
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8">
@@ -41,13 +44,36 @@ export default async function DashboardPage() {
       />
 
       <Badge variant="secondary" className="w-fit">
-        Phase 5 — Dashboard shell
+        Phase 6 — Brands
       </Badge>
 
       <InstallPrompt />
 
-      <section className="grid gap-4 sm:grid-cols-3">
-        {QUICK_STATS.map((stat) => (
+      {brandCount === 0 ? (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
+            <div className="space-y-1">
+              <CardDescription className="text-foreground">
+                Set up your first brand
+              </CardDescription>
+              <p className="text-sm text-muted-foreground">
+                AI content generation needs a brand profile to match your voice
+                and audience.
+              </p>
+            </div>
+            <Button
+              render={<Link href="/dashboard/brands/new" />}
+              nativeButton={false}
+            >
+              <Building2 aria-hidden />
+              Create brand
+            </Button>
+          </CardHeader>
+        </Card>
+      ) : null}
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {quickStats.map((stat) => (
           <Card key={stat.label}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardDescription>{stat.label}</CardDescription>

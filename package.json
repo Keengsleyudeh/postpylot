@@ -11,7 +11,11 @@
     "build": "npm run build -w @postpylot/web",
     "lint": "npm run lint -w @postpylot/web",
     "typecheck": "npm run typecheck -w @postpylot/web",
-    "start": "npm run start -w @postpylot/web"
+    "start": "npm run start -w @postpylot/web",
+    "db:generate": "npm run generate -w @postpylot/db",
+    "db:migrate": "npm run migrate -w @postpylot/db",
+    "db:push": "npm run push -w @postpylot/db",
+    "db:studio": "npm run studio -w @postpylot/db"
   },
   "engines": {
     "node": ">=20"
