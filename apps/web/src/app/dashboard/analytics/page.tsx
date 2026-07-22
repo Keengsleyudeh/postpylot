@@ -17,7 +17,7 @@ export default function AnalyticsPage() {
         description="Track performance across YouTube, TikTok, LinkedIn, and Facebook."
       />
       <EmptyState
-        icon={BarChart3}
+        icon={<BarChart3 aria-hidden />}
         title="No analytics data"
         description="Performance metrics will sync from connected platforms after you publish content. Basic charts and reports arrive in a later phase."
         action={<PhaseStubAction label="View reports" phase="Phase 12" />}

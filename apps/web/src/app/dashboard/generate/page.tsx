@@ -35,7 +35,7 @@ export default async function GeneratePage() {
 
       {brands.length === 0 ? (
         <EmptyState
-          icon={Sparkles}
+          icon={<Sparkles aria-hidden />}
           title="Set up a brand first"
           description="AI generation needs a brand profile to match your voice and audience."
           action={

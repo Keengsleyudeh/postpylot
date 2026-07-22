@@ -48,7 +48,7 @@ export default async function PostsPage() {
 
       {views.length === 0 ? (
         <EmptyState
-          icon={Send}
+          icon={<Send aria-hidden />}
           title="No posts yet"
           description="Generate content to create drafts, then schedule or publish them here."
           action={

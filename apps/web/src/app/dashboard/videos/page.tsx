@@ -60,7 +60,7 @@ export default async function VideosPage() {
 
       {brands.length === 0 ? (
         <EmptyState
-          icon={Video}
+          icon={<Video aria-hidden />}
           title="Set up a brand first"
           description="Video generation needs a brand profile to match your voice and audience."
           action={
@@ -77,7 +77,7 @@ export default async function VideosPage() {
           />
           {views.length === 0 ? (
             <EmptyState
-              icon={Video}
+              icon={<Video aria-hidden />}
               title="No videos yet"
               description="Generate your first YouTube video above. It renders in the background and appears here when ready."
             />

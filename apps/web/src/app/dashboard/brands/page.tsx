@@ -50,7 +50,7 @@ export default async function BrandsPage() {
         </div>
       ) : (
         <EmptyState
-          icon={Building2}
+          icon={<Building2 aria-hidden />}
           title="No brands yet"
           description="Create your first brand profile to unlock AI content generation tailored to your voice and audience."
           action={

@@ -1,23 +1,25 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
 
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { fadeUp, getMotionVariants } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 
 export function EmptyState({
-  icon: Icon,
+  icon,
   title,
   description,
   action,
   className,
 }: {
-  icon: LucideIcon;
+  // ReactNode (JSX) — not LucideIcon — so Server Components can pass icons
+  // across the Server→Client boundary without serializing a function.
+  icon: ReactNode;
   title: string;
   description: string;
-  action?: React.ReactNode;
+  action?: ReactNode;
   className?: string;
 }) {
   const prefersReducedMotion = useReducedMotion();
@@ -34,7 +36,7 @@ export function EmptyState({
       )}
     >
       <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-        <Icon className="size-6 text-primary" aria-hidden />
+        <span className="flex [&>svg]:size-6 [&>svg]:text-primary">{icon}</span>
       </div>
       <h2 className="font-heading text-lg font-semibold">{title}</h2>
       <p className="mt-2 max-w-md text-sm text-muted-foreground">
