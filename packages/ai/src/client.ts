@@ -5,8 +5,10 @@ import type { ZodType } from "zod";
 // LLM client with Gemini as the primary provider and OpenAI as the fallback
 // (per postpylot-core.mdc). Providers are attempted in order; the first one
 // with an API key configured is used, falling through on failure.
+// Default model: gemini-3.1-flash-lite — free-tier friendly for new API keys.
+// gemini-2.0-flash is shut down; gemini-2.5-flash is blocked for new users.
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite";
 const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
 export class NoLlmProviderError extends Error {
@@ -26,24 +28,48 @@ export class LlmGenerationError extends Error {
 }
 
 let geminiClient: GoogleGenAI | null = null;
+let geminiKeyUsed: string | null = null;
 let openaiClient: OpenAI | null = null;
+let openaiKeyUsed: string | null = null;
 
 function getGemini(): GoogleGenAI | null {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
-  geminiClient ??= new GoogleGenAI({ apiKey });
+  // Recreate if the env key changed (e.g. .env.local edited without a full restart).
+  if (!geminiClient || geminiKeyUsed !== apiKey) {
+    geminiClient = new GoogleGenAI({ apiKey });
+    geminiKeyUsed = apiKey;
+  }
   return geminiClient;
 }
 
 function getOpenAI(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return null;
-  openaiClient ??= new OpenAI({ apiKey });
+  if (!openaiClient || openaiKeyUsed !== apiKey) {
+    openaiClient = new OpenAI({ apiKey });
+    openaiKeyUsed = apiKey;
+  }
   return openaiClient;
 }
 
 export function hasLlmProvider(): boolean {
   return Boolean(process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY);
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+/** True when the failure is clearly an OpenAI (or similar) billing/quota block. */
+function isQuotaOrBillingError(error: unknown): boolean {
+  const msg = errorMessage(error).toLowerCase();
+  return (
+    msg.includes("429") ||
+    msg.includes("exceeded your current quota") ||
+    msg.includes("insufficient_quota") ||
+    msg.includes("billing details")
+  );
 }
 
 function extractJson(raw: string): unknown {
@@ -107,6 +133,8 @@ async function generateWithOpenAI(
 /**
  * Generate a structured JSON value validated against a Zod schema. Tries Gemini
  * first, then OpenAI. Throws `NoLlmProviderError` when nothing is configured.
+ * On total failure, surfaces every provider’s error so a dead Gemini model is
+ * never hidden behind an OpenAI 429.
  */
 export async function generateJson<T>(
   schema: ZodType<T>,
@@ -117,27 +145,48 @@ export async function generateJson<T>(
     throw new NoLlmProviderError();
   }
 
-  const providers: Array<() => Promise<string | null>> = [
-    () => generateWithGemini(system, user),
-    () => generateWithOpenAI(system, user),
-  ];
+  const failures: string[] = [];
+  let geminiFailed = false;
 
-  let lastError: unknown = null;
-
-  for (const provider of providers) {
+  // 1. Gemini (primary)
+  if (process.env.GEMINI_API_KEY) {
     try {
-      const raw = await provider();
-      if (!raw) continue; // provider not configured
-      const parsed = schema.parse(extractJson(raw));
-      return parsed;
+      const raw = await generateWithGemini(system, user);
+      if (raw) {
+        return schema.parse(extractJson(raw));
+      }
+      failures.push("Gemini: empty response");
+      geminiFailed = true;
     } catch (error) {
-      lastError = error;
+      failures.push(`Gemini: ${errorMessage(error)}`);
+      geminiFailed = true;
+    }
+  }
+
+  // 2. OpenAI (fallback) — still attempt unless not configured.
+  if (process.env.OPENAI_API_KEY) {
+    try {
+      const raw = await generateWithOpenAI(system, user);
+      if (raw) {
+        return schema.parse(extractJson(raw));
+      }
+      failures.push("OpenAI: empty response");
+    } catch (error) {
+      // If OpenAI is just out of quota and Gemini already failed, keep Gemini’s
+      // message first so billing noise does not hide the real primary failure.
+      if (geminiFailed && isQuotaOrBillingError(error)) {
+        failures.push(
+          `OpenAI: skipped (quota/billing — ${errorMessage(error)})`
+        );
+      } else {
+        failures.push(`OpenAI: ${errorMessage(error)}`);
+      }
     }
   }
 
   throw new LlmGenerationError(
-    lastError instanceof Error
-      ? `LLM generation failed: ${lastError.message}`
+    failures.length
+      ? `LLM generation failed: ${failures.join("; ")}`
       : "LLM generation failed."
   );
 }

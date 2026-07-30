@@ -10,11 +10,19 @@ export const topicSuggestionSchema = z.object({
   rationale: z.string().min(1).max(600),
 });
 
-export const generatedPostSchema = z.object({
-  platform: z.enum(PLATFORMS),
+export const generatedPostContentSchema = z.object({
   content: z.string().min(1).max(6000),
   hashtags: z.array(z.string().min(1).max(60)).max(15).default([]),
   imageIdea: z.string().min(1).max(400),
+});
+
+export const generatedPostSchema = generatedPostContentSchema.extend({
+  // Normalize casing so "YouTube" / "LinkedIn" from the model still parse; the
+  // writer agent overwrites this with the requested platform either way.
+  platform: z.preprocess(
+    (v) => (typeof v === "string" ? v.trim().toLowerCase() : v),
+    z.enum(PLATFORMS)
+  ),
 });
 
 export const qualityScoreSchema = z.object({
@@ -42,6 +50,7 @@ export const youtubeScriptSchema = z.object({
 });
 
 export type TopicSuggestionParsed = z.infer<typeof topicSuggestionSchema>;
+export type GeneratedPostContentParsed = z.infer<typeof generatedPostContentSchema>;
 export type GeneratedPostParsed = z.infer<typeof generatedPostSchema>;
 export type QualityScoreParsed = z.infer<typeof qualityScoreSchema>;
 export type YouTubeScriptParsed = z.infer<typeof youtubeScriptSchema>;

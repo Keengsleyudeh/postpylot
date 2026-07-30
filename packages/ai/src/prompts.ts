@@ -32,7 +32,7 @@ export function topicPrompt(brand: BrandContext, topicHint?: string): string {
 }
 
 export const WRITER_SYSTEM =
-  "You are the Writer Agent for a social media automation platform. You write a single, ready-to-publish post for one platform. Match the brand voice, respect forbidden topics, and never invent facts about the brand. Respond ONLY with JSON matching: { \"platform\": string, \"content\": string, \"hashtags\": string[], \"imageIdea\": string }.";
+  'You are the Writer Agent for a social media automation platform. You write a single, ready-to-publish post for one platform. Match the brand voice, respect forbidden topics, and never invent facts about the brand. Respond ONLY with JSON matching: { "platform": string, "content": string, "hashtags": string[], "imageIdea": string }. If you include platform, it MUST be exactly one of these lowercase values: youtube, tiktok, linkedin, facebook.';
 
 export function writerPrompt(
   brand: BrandContext,

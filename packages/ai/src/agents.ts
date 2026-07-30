@@ -20,7 +20,7 @@ import {
   youtubeScriptPrompt,
 } from "./prompts";
 import {
-  generatedPostSchema,
+  generatedPostContentSchema,
   qualityScoreSchema,
   topicSuggestionSchema,
   youtubeScriptSchema,
@@ -63,12 +63,13 @@ export async function writerAgent(
   return withAgentLog(
     { agent: "writer", brandId: brand.id, input: { platform, topic: topic.title } },
     async () => {
+      // Validate content only — the model often returns platform labels like
+      // "YouTube" that fail a strict enum. We inject the requested platform.
       const parsed = await generateJson(
-        generatedPostSchema,
+        generatedPostContentSchema,
         WRITER_SYSTEM,
         writerPrompt(brand, platform, topic)
       );
-      // Trust our platform target over whatever the model echoed back.
       return { ...parsed, platform } satisfies GeneratedPost;
     }
   );
