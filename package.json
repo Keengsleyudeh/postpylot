@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "dev": "npm run dev -w @postpylot/web",
+    "dev:all": "concurrently -n web,worker -c green,cyan \"npm run dev\" \"npm run worker:dev\"",
     "build": "npm run build -w @postpylot/web",
     "lint": "npm run lint -w @postpylot/web",
     "typecheck": "npm run typecheck -w @postpylot/web",
@@ -22,5 +23,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.4"
   }
 }

@@ -39,14 +39,14 @@ export const qualityScoreSchema = z.object({
 export const videoSceneSchema = z.object({
   narration: z.string().min(1).max(800),
   onScreenText: z.string().min(1).max(120),
-  durationSeconds: z.number().min(2).max(20),
+  durationSeconds: z.number().min(2).max(8),
 });
 
 export const youtubeScriptSchema = z.object({
   title: z.string().min(1).max(100),
   description: z.string().min(1).max(4000),
   tags: z.array(z.string().min(1).max(60)).max(15).default([]),
-  scenes: z.array(videoSceneSchema).min(2).max(12),
+  scenes: z.array(videoSceneSchema).min(2).max(6),
 });
 
 export type TopicSuggestionParsed = z.infer<typeof topicSuggestionSchema>;

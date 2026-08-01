@@ -136,14 +136,22 @@ export async function handleRenderVideo(videoId: string): Promise<void> {
 
     const visualSeconds = scenes.reduce((sum, s) => sum + s.durationSeconds, 0);
 
-    // 1. Voice-over (Piper). Optional: if not configured, render silent.
+    // 1. Voice-over (Piper). Optional: if not configured or Piper fails, render silent.
     let narrationSeconds = 0;
     let narrationPath: string | null = null;
     if (isVoiceConfigured()) {
       const narration = scenes.map((s) => s.narration).join("\n");
-      narrationPath = join(workDir, "narration.wav");
-      await synthesize(narration, narrationPath);
-      narrationSeconds = await getWavDurationSeconds(narrationPath);
+      const candidatePath = join(workDir, "narration.wav");
+      try {
+        await synthesize(narration, candidatePath);
+        narrationSeconds = await getWavDurationSeconds(candidatePath);
+        narrationPath = candidatePath;
+      } catch (error) {
+        console.warn(
+          `[render-video] ${videoId} Piper failed; continuing silent:`,
+          error instanceof Error ? error.message : error
+        );
+      }
     }
 
     const totalDurationSeconds = Math.max(visualSeconds, narrationSeconds, 3);

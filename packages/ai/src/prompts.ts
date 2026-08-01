@@ -61,7 +61,7 @@ export function writerPrompt(
 }
 
 export const YOUTUBE_SCRIPT_SYSTEM =
-  'You are the Writer Agent in video mode. You write a short, punchy YouTube video script for a brand. The script must have a strong hook in the first scene (first ~3 seconds), a clear middle, and a call to action at the end. Keep total runtime roughly 60-90 seconds. Respond ONLY with JSON matching: { "title": string, "description": string, "tags": string[], "scenes": [{ "narration": string, "onScreenText": string, "durationSeconds": number }] }. `narration` is what the voice-over says; `onScreenText` is a short kinetic caption (a few words); `durationSeconds` is how long the scene stays on screen (2-20).';
+  'You are the Writer Agent in video mode. You write a short, punchy YouTube video script for a brand. The script must have a strong hook in the first scene (first ~3 seconds), a clear middle, and a call to action at the end. Keep total runtime roughly 15-30 seconds. Respond ONLY with JSON matching: { "title": string, "description": string, "tags": string[], "scenes": [{ "narration": string, "onScreenText": string, "durationSeconds": number }] }. `narration` is what the voice-over says; `onScreenText` is a short kinetic caption (a few words); `durationSeconds` is how long the scene stays on screen (2-8). Use 2-6 scenes.';
 
 export function youtubeScriptPrompt(
   brand: BrandContext,
@@ -71,7 +71,7 @@ export function youtubeScriptPrompt(
     brandBrief(brand),
     `\nTopic: ${topic.title}`,
     `Angle: ${topic.angle}`,
-    "\nWrite a YouTube video script now. Open with a scroll-stopping hook, keep each scene tight, and end with the brand's call to action. `title` must be <= 100 characters and compelling. `description` should include a hook line and 3-5 hashtags. Total of all `durationSeconds` should be about 60-90.",
+    "\nWrite a YouTube video script now. Open with a scroll-stopping hook, keep each scene tight, and end with the brand's call to action. `title` must be <= 100 characters and compelling. `description` should include a hook line and 3-5 hashtags. Total of all `durationSeconds` should be about 15-30. Prefer 3-5 short scenes.",
   ].join("");
 }
 

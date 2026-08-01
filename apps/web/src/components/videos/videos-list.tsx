@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   CalendarClock,
@@ -45,6 +45,10 @@ const STATUS_VARIANT: Record<
   cancelled: "destructive",
 };
 
+const DRAFT_POLL_MS = 5000;
+/** After this many draft polls, show the worker hint. */
+const WORKER_HINT_AFTER_POLLS = 3;
+
 function defaultScheduleValue(): string {
   const d = new Date(Date.now() + 60 * 60 * 1000);
   d.setSeconds(0, 0);
@@ -52,7 +56,13 @@ function defaultScheduleValue(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function VideoItem({ video }: { video: VideoView }) {
+function VideoItem({
+  video,
+  showWorkerHint,
+}: {
+  video: VideoView;
+  showWorkerHint: boolean;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [when, setWhen] = useState(defaultScheduleValue);
@@ -66,6 +76,10 @@ function VideoItem({ video }: { video: VideoView }) {
     video.status === "scheduled" ||
     video.status === "failed";
   const canPublish = ready && !done;
+  const canRerender =
+    video.status === "failed" ||
+    video.status === "generated" ||
+    video.status === "draft";
 
   function run(action: () => Promise<{ ok: boolean; error?: string }>) {
     setError(null);
@@ -92,7 +106,17 @@ function VideoItem({ video }: { video: VideoView }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex gap-3">
-          {video.thumbnailUrl ? (
+          {video.videoUrl ? (
+            <video
+              src={video.videoUrl}
+              controls
+              preload="metadata"
+              poster={video.thumbnailUrl ?? undefined}
+              className="aspect-video w-56 shrink-0 rounded-lg border border-border bg-muted object-cover"
+            >
+              <track kind="captions" />
+            </video>
+          ) : video.thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={video.thumbnailUrl}
@@ -111,15 +135,13 @@ function VideoItem({ video }: { video: VideoView }) {
                 Rendering in the background. This can take a few minutes.
               </p>
             ) : null}
-            {video.videoUrl && !done ? (
-              <a
-                href={video.videoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm text-primary underline-offset-4 hover:underline"
-              >
-                Preview rendered video
-              </a>
+            {rendering && showWorkerHint ? (
+              <p className="text-xs text-warning" role="status">
+                Waiting for worker… run{" "}
+                <code className="font-mono text-[0.7rem]">npm run worker:dev</code>{" "}
+                (or <code className="font-mono text-[0.7rem]">npm run dev:all</code>
+                ).
+              </p>
             ) : null}
           </div>
         </div>
@@ -188,7 +210,7 @@ function VideoItem({ video }: { video: VideoView }) {
               </>
             ) : null}
 
-            {video.status === "failed" || video.status === "generated" ? (
+            {canRerender ? (
               <Button
                 type="button"
                 variant="outline"
@@ -196,7 +218,11 @@ function VideoItem({ video }: { video: VideoView }) {
                 disabled={isPending || busy}
               >
                 <RefreshCw aria-hidden />
-                {video.status === "failed" ? "Retry render" : "Re-render"}
+                {video.status === "failed"
+                  ? "Retry render"
+                  : video.status === "draft"
+                    ? "Re-queue render"
+                    : "Re-render"}
               </Button>
             ) : null}
 
@@ -216,10 +242,34 @@ function VideoItem({ video }: { video: VideoView }) {
 }
 
 export function VideosList({ videos }: { videos: VideoView[] }) {
+  const router = useRouter();
+  const hasDrafts = videos.some((v) => v.status === "draft");
+  const [draftPollCount, setDraftPollCount] = useState(0);
+
+  useEffect(() => {
+    if (!hasDrafts) {
+      setDraftPollCount(0);
+      return;
+    }
+
+    const id = window.setInterval(() => {
+      setDraftPollCount((n) => n + 1);
+      router.refresh();
+    }, DRAFT_POLL_MS);
+
+    return () => window.clearInterval(id);
+  }, [hasDrafts, router]);
+
+  const showWorkerHint = hasDrafts && draftPollCount >= WORKER_HINT_AFTER_POLLS;
+
   return (
     <div className="grid gap-3">
       {videos.map((video) => (
-        <VideoItem key={video.id} video={video} />
+        <VideoItem
+          key={video.id}
+          video={video}
+          showWorkerHint={showWorkerHint && video.status === "draft"}
+        />
       ))}
     </div>
   );

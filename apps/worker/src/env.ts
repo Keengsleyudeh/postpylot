@@ -7,6 +7,19 @@ import { config } from "dotenv";
 config({ path: resolve(import.meta.dirname, "../../../apps/web/.env.local") });
 config(); // fall back to a local .env if present
 
+// Prefer the session-mode DIRECT_URL for Prisma in the worker. The transaction
+// pooler (6543) is flaky from long-lived Node processes; pg-boss already requires
+// DIRECT_URL, so aligning Prisma avoids "Can't reach database server" mid-job.
+if (process.env.DIRECT_URL) {
+  process.env.DATABASE_URL = process.env.DIRECT_URL;
+}
+
+// Match pg-boss: Supabase pooler certs fail verify-full under recent Node/pg.
+// Without this, Prisma intermittently reports "Can't reach database server".
+if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === undefined) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
+
 // pg-boss needs a session-mode (direct) connection — the pooled transaction-mode
 // URL (pgbouncer) does not support LISTEN/NOTIFY or prepared statements.
 export function getQueueConnectionString(): string {

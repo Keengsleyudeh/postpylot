@@ -1,3 +1,4 @@
+import "./env";
 import { getQueueConfig } from "./env";
 import PgBoss from "pg-boss";
 import {
