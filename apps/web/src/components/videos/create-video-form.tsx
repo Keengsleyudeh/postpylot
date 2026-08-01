@@ -73,13 +73,17 @@ export function CreateVideoForm({
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="video-topic">Topic hint (optional)</Label>
+          <Label htmlFor="video-topic">Topic (optional)</Label>
           <Input
             id="video-topic"
             value={topicHint}
             onChange={(event) => setTopicHint(event.target.value)}
-            placeholder="e.g. how our product saves time, a customer story..."
+            placeholder="What should this video be about?"
           />
+          <p className="text-xs text-muted-foreground">
+            Leave blank to auto-pick a topic. When filled, the script stays on
+            this subject.
+          </p>
         </div>
 
         {error ? (

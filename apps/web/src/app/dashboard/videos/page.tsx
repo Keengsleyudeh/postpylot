@@ -49,6 +49,7 @@ export default async function VideosPage() {
     videoUrl: readMetaString(video.metadata, "videoUrl"),
     publishedUrl: readMetaString(video.metadata, "url"),
     scheduledAt: video.schedules[0]?.scheduledAt.toISOString() ?? null,
+    voiceStatus: readMetaString(video.metadata, "voiceStatus"),
   }));
 
   return (

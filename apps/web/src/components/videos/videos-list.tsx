@@ -30,6 +30,7 @@ export type VideoView = {
   videoUrl: string | null;
   publishedUrl: string | null;
   scheduledAt: string | null;
+  voiceStatus: string | null;
 };
 
 const STATUS_VARIANT: Record<
@@ -141,6 +142,11 @@ function VideoItem({
                 <code className="font-mono text-[0.7rem]">npm run worker:dev</code>{" "}
                 (or <code className="font-mono text-[0.7rem]">npm run dev:all</code>
                 ).
+              </p>
+            ) : null}
+            {video.voiceStatus === "failed" && !rendering ? (
+              <p className="text-xs text-warning" role="status">
+                Rendered without voice-over — check Piper setup / Re-render.
               </p>
             ) : null}
           </div>

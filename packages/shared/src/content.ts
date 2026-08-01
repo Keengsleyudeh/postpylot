@@ -33,11 +33,15 @@ export type GeneratedDraft = {
 };
 
 // A single narrated scene in a generated video script. `durationSeconds` drives
-// the Remotion timeline and the pacing of on-screen kinetic text.
+// the Remotion timeline and the pacing of on-screen kinetic text. `role` picks
+// the Remotion layout (hook / point / cta).
+export type VideoSceneRole = "hook" | "point" | "cta";
+
 export type VideoScene = {
   narration: string;
   onScreenText: string;
   durationSeconds: number;
+  role: VideoSceneRole;
 };
 
 // Structured YouTube video script produced by the Writer agent (video mode).

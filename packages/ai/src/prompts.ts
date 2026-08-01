@@ -61,17 +61,21 @@ export function writerPrompt(
 }
 
 export const YOUTUBE_SCRIPT_SYSTEM =
-  'You are the Writer Agent in video mode. You write a short, punchy YouTube video script for a brand. The script must have a strong hook in the first scene (first ~3 seconds), a clear middle, and a call to action at the end. Keep total runtime roughly 15-30 seconds. Respond ONLY with JSON matching: { "title": string, "description": string, "tags": string[], "scenes": [{ "narration": string, "onScreenText": string, "durationSeconds": number }] }. `narration` is what the voice-over says; `onScreenText` is a short kinetic caption (a few words); `durationSeconds` is how long the scene stays on screen (2-8). Use 2-6 scenes.';
+  'You are the Writer Agent in video mode. You write a short, punchy YouTube video script that stays tightly on the given topic — never drift to unrelated trends. The script must have a strong hook in the first scene (first ~3 seconds), clear middle points, and a call to action at the end. Keep total runtime roughly 15-30 seconds. Respond ONLY with JSON matching: { "title": string, "description": string, "tags": string[], "scenes": [{ "narration": string, "onScreenText": string, "durationSeconds": number, "role": "hook"|"point"|"cta" }] }. `narration` is what the voice-over says and MUST name the topic\'s concrete subject. `onScreenText` is a short kinetic caption (a few words) that is a specific claim or phrase from that topic — never generic filler like "Here\'s why" or "Let\'s dig in". `durationSeconds` is 2-8. `role` is "hook" for the opening scene, "point" for middle scenes, "cta" for the final scene. Use 2-6 scenes (prefer 3-5). First scene role=hook, last scene role=cta.';
 
 export function youtubeScriptPrompt(
   brand: BrandContext,
-  topic: { title: string; angle: string }
+  topic: { title: string; angle: string },
+  userTopic?: string
 ): string {
   return [
     brandBrief(brand),
     `\nTopic: ${topic.title}`,
     `Angle: ${topic.angle}`,
-    "\nWrite a YouTube video script now. Open with a scroll-stopping hook, keep each scene tight, and end with the brand's call to action. `title` must be <= 100 characters and compelling. `description` should include a hook line and 3-5 hashtags. Total of all `durationSeconds` should be about 15-30. Prefer 3-5 short scenes.",
+    userTopic
+      ? `\nUSER TOPIC (mandatory — every scene must stay about this exact subject; do not reinterpret or swap topics): ${userTopic}`
+      : "",
+    "\nWrite a YouTube video script now. Open with a scroll-stopping hook that names the topic, keep each scene a concrete point about that topic, and end with the brand's call to action. `title` must be <= 100 characters, compelling, and clearly about the topic. `description` should include a hook line and 3-5 hashtags. Total of all `durationSeconds` should be about 15-30. Prefer 3-5 short scenes. Assign role=hook to scene 1, role=point to middle scenes, role=cta to the last scene.",
   ].join("");
 }
 

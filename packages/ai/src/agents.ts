@@ -76,17 +76,23 @@ export async function writerAgent(
 }
 
 // Writer Agent (video mode) — writes a YouTube video script for a topic.
+// Pass `userTopic` when the user typed an exact topic so the script stays literal.
 export async function youtubeScriptAgent(
   brand: BrandContext,
-  topic: TopicSuggestion
+  topic: TopicSuggestion,
+  userTopic?: string
 ): Promise<YouTubeScript> {
   return withAgentLog(
-    { agent: "writer-video", brandId: brand.id, input: { topic: topic.title } },
+    {
+      agent: "writer-video",
+      brandId: brand.id,
+      input: { topic: topic.title, userTopic: userTopic ?? null },
+    },
     () =>
       generateJson(
         youtubeScriptSchema,
         YOUTUBE_SCRIPT_SYSTEM,
-        youtubeScriptPrompt(brand, topic)
+        youtubeScriptPrompt(brand, topic, userTopic)
       )
   );
 }

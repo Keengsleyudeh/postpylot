@@ -1,10 +1,14 @@
 import { spawn } from "node:child_process";
-import { open } from "node:fs/promises";
+import { access, open, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+
+import ffmpegPath from "ffmpeg-static";
 
 // Piper TTS (MVP voice, self-hosted, free — ADR 002). We shell out to the Piper
 // binary and abstract it behind `synthesize()` so Kokoro/ElevenLabs can be
 // swapped in later without changing callers. Configure PIPER_BIN (executable)
-// and PIPER_VOICE (.onnx model path) in the worker environment.
+// and PIPER_VOICE (.onnx model path) in the worker environment. The sibling
+// `.onnx.json` config MUST sit next to the model or Piper aborts on Windows.
 
 export class VoiceNotConfiguredError extends Error {
   constructor() {
@@ -19,8 +23,34 @@ export function isVoiceConfigured(): boolean {
   return Boolean(process.env.PIPER_BIN && process.env.PIPER_VOICE);
 }
 
-// Synthesizes `text` to a WAV file at `outputPath` using Piper. Text is written
-// to stdin; Piper writes a single WAV to the output path.
+function voiceConfigPath(voiceOnnxPath: string): string {
+  return `${voiceOnnxPath}.json`;
+}
+
+async function assertVoiceFiles(bin: string, voice: string): Promise<void> {
+  try {
+    await access(bin);
+  } catch {
+    throw new Error(`PIPER_BIN not found: ${bin}`);
+  }
+  try {
+    await access(voice);
+  } catch {
+    throw new Error(`PIPER_VOICE not found: ${voice}`);
+  }
+  const config = voiceConfigPath(voice);
+  try {
+    await access(config);
+  } catch {
+    throw new Error(
+      `Piper voice config missing: ${config}. Download the matching .onnx.json next to the model (e.g. from rhasspy/piper-voices on Hugging Face).`
+    );
+  }
+}
+
+// Synthesizes `text` to a WAV file at `outputPath` using Piper. Writes text to
+// a sibling temp file first, then feeds it to stdin in one shot — more reliable
+// on Windows than streaming a giant buffer into a crashing onnxruntime.
 export async function synthesize(
   text: string,
   outputPath: string
@@ -31,11 +61,26 @@ export async function synthesize(
     throw new VoiceNotConfiguredError();
   }
 
+  await assertVoiceFiles(bin, voice);
+
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    throw new Error("Cannot synthesize empty narration.");
+  }
+
+  const inputPath = join(dirname(outputPath), `piper-in-${Date.now()}.txt`);
+  await writeFile(inputPath, cleaned, "utf8");
+
   await new Promise<void>((resolve, reject) => {
     const child = spawn(
       bin,
       ["--model", voice, "--output_file", outputPath],
-      { stdio: ["pipe", "ignore", "pipe"] }
+      {
+        // Piper resolves espeak-ng-data and DLLs relative to its install dir.
+        cwd: dirname(bin),
+        stdio: ["pipe", "ignore", "pipe"],
+        windowsHide: true,
+      }
     );
 
     let stderr = "";
@@ -47,12 +92,72 @@ export async function synthesize(
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`Piper exited with code ${code}: ${stderr.trim()}`));
+        reject(
+          new Error(
+            `Piper exited with code ${code}: ${stderr.trim() || "(no stderr)"}`
+          )
+        );
       }
     });
 
-    child.stdin.write(text);
+    child.stdin.write(cleaned);
     child.stdin.end();
+  });
+}
+
+// Concatenates multiple WAV files into one with ffmpeg-static (re-encodes to a
+// consistent PCM WAV so mismatched Piper outputs still join cleanly).
+export async function concatenateWavs(
+  inputPaths: string[],
+  outputPath: string
+): Promise<void> {
+  if (!ffmpegPath) {
+    throw new Error("ffmpeg-static binary not found.");
+  }
+  if (inputPaths.length === 0) {
+    throw new Error("No WAV files to concatenate.");
+  }
+  if (inputPaths.length === 1) {
+    const { copyFile } = await import("node:fs/promises");
+    await copyFile(inputPaths[0], outputPath);
+    return;
+  }
+
+  const listPath = join(dirname(outputPath), `concat-${Date.now()}.txt`);
+  const listBody = inputPaths
+    .map((p) => `file '${p.replace(/\\/g, "/").replace(/'/g, "'\\''")}'`)
+    .join("\n");
+  await writeFile(listPath, listBody, "utf8");
+
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(
+      ffmpegPath as string,
+      [
+        "-y",
+        "-f",
+        "concat",
+        "-safe",
+        "0",
+        "-i",
+        listPath,
+        "-c",
+        "copy",
+        outputPath,
+      ],
+      { windowsHide: true }
+    );
+    let stderr = "";
+    child.stderr.on("data", (c) => (stderr += String(c)));
+    child.on("error", reject);
+    child.on("close", (code) =>
+      code === 0
+        ? resolve()
+        : reject(
+            new Error(
+              `ffmpeg concat failed (${code}): ${stderr.slice(-500)}`
+            )
+          )
+    );
   });
 }
 

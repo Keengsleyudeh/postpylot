@@ -10,22 +10,33 @@ import ffmpegPath from "ffmpeg-static";
 import { prisma } from "@postpylot/db";
 
 import { COMPOSITION_ID } from "../remotion/Root";
-import type { YouTubeHorizontalProps } from "../remotion/YouTubeHorizontal";
+import type {
+  RemotionSceneRole,
+  YouTubeHorizontalProps,
+} from "../remotion/YouTubeHorizontal";
 import { uploadBuffer, uploadFile } from "../media/storage";
 import { renderThumbnail } from "../media/thumbnail";
 import {
+  concatenateWavs,
   getWavDurationSeconds,
   isVoiceConfigured,
   synthesize,
 } from "../voice/piper";
 
 const FPS = 30;
+const AUDIO_PAD_SECONDS = 0.15;
 
 type Scene = {
   narration: string;
   onScreenText: string;
   durationSeconds: number;
+  role: RemotionSceneRole;
 };
+
+function parseRole(raw: unknown): RemotionSceneRole {
+  if (raw === "hook" || raw === "point" || raw === "cta") return raw;
+  return "point";
+}
 
 function parseScenes(metadata: unknown): Scene[] {
   if (
@@ -36,13 +47,20 @@ function parseScenes(metadata: unknown): Scene[] {
   ) {
     const raw = (metadata as { scenes: unknown[] }).scenes;
     return raw
-      .map((s) => {
+      .map((s, index, arr) => {
         if (!s || typeof s !== "object") return null;
         const scene = s as Record<string, unknown>;
+        let role = parseRole(scene.role);
+        // Heuristic for older scripts without role.
+        if (!scene.role) {
+          if (index === 0) role = "hook";
+          else if (index === arr.length - 1) role = "cta";
+        }
         return {
           narration: String(scene.narration ?? ""),
           onScreenText: String(scene.onScreenText ?? ""),
           durationSeconds: Number(scene.durationSeconds ?? 4) || 4,
+          role,
         } satisfies Scene;
       })
       .filter((s): s is Scene => s !== null);
@@ -134,27 +152,60 @@ export async function handleRenderVideo(videoId: string): Promise<void> {
       : [];
     const accent = brandColors[0] ?? "#C8FF00";
 
-    const visualSeconds = scenes.reduce((sum, s) => sum + s.durationSeconds, 0);
-
-    // 1. Voice-over (Piper). Optional: if not configured or Piper fails, render silent.
-    let narrationSeconds = 0;
+    // 1. Voice-over (Piper) — one WAV per scene, then sync durations to audio.
     let narrationPath: string | null = null;
+    let voiceStatus: "ok" | "skipped" | "failed" = "skipped";
+    let voiceError: string | null = null;
+    const timedScenes: Scene[] = scenes.map((s) => ({ ...s }));
+
     if (isVoiceConfigured()) {
-      const narration = scenes.map((s) => s.narration).join("\n");
-      const candidatePath = join(workDir, "narration.wav");
-      try {
-        await synthesize(narration, candidatePath);
-        narrationSeconds = await getWavDurationSeconds(candidatePath);
+      const sceneWavs: string[] = [];
+      const failures: string[] = [];
+
+      for (let i = 0; i < timedScenes.length; i++) {
+        const scene = timedScenes[i];
+        const wavPath = join(workDir, `scene-${i}.wav`);
+        try {
+          await synthesize(scene.narration, wavPath);
+          const wavSeconds = await getWavDurationSeconds(wavPath);
+          scene.durationSeconds = Math.max(
+            scene.durationSeconds,
+            wavSeconds + AUDIO_PAD_SECONDS
+          );
+          sceneWavs.push(wavPath);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          failures.push(`scene ${i + 1}: ${message}`);
+          console.warn(
+            `[render-video] ${videoId} Piper failed on scene ${i + 1}:`,
+            message
+          );
+        }
+      }
+
+      if (sceneWavs.length === timedScenes.length) {
+        const candidatePath = join(workDir, "narration.wav");
+        await concatenateWavs(sceneWavs, candidatePath);
         narrationPath = candidatePath;
-      } catch (error) {
+        voiceStatus = "ok";
+      } else {
+        // Do not mux partial audio — scene timeline would desync from VO.
+        voiceStatus = "failed";
+        voiceError =
+          failures.join("; ") ||
+          `Piper only completed ${sceneWavs.length}/${timedScenes.length} scenes.`;
         console.warn(
-          `[render-video] ${videoId} Piper failed; continuing silent:`,
-          error instanceof Error ? error.message : error
+          `[render-video] ${videoId} continuing silent:`,
+          voiceError
         );
       }
     }
 
-    const totalDurationSeconds = Math.max(visualSeconds, narrationSeconds, 3);
+    const totalDurationSeconds = Math.max(
+      timedScenes.reduce((sum, s) => sum + s.durationSeconds, 0),
+      3
+    );
 
     // 2. Bundle + render the Remotion composition (visuals only).
     await ensureBrowser();
@@ -165,9 +216,10 @@ export async function handleRenderVideo(videoId: string): Promise<void> {
       brandName: video.brand.name,
       title: video.title,
       accent,
-      scenes: scenes.map((s) => ({
+      scenes: timedScenes.map((s) => ({
         onScreenText: s.onScreenText,
         durationSeconds: s.durationSeconds,
+        role: s.role,
       })),
       fps: FPS,
       totalDurationSeconds,
@@ -228,6 +280,11 @@ export async function handleRenderVideo(videoId: string): Promise<void> {
       },
     });
 
+    const prevMeta =
+      video.metadata && typeof video.metadata === "object"
+        ? (video.metadata as Record<string, unknown>)
+        : {};
+
     await prisma.$transaction([
       prisma.video.update({
         where: { id: video.id },
@@ -237,11 +294,12 @@ export async function handleRenderVideo(videoId: string): Promise<void> {
           durationSeconds: Math.round(totalDurationSeconds),
           thumbnailAssetId: thumbnailAsset.id,
           metadata: {
-            ...(video.metadata && typeof video.metadata === "object"
-              ? (video.metadata as Record<string, unknown>)
-              : {}),
+            ...prevMeta,
+            scenes: timedScenes,
             videoUrl: uploadedVideo.url,
             thumbnailUrl: uploadedThumb.url,
+            voiceStatus,
+            ...(voiceError ? { voiceError } : { voiceError: null }),
           },
         },
       }),
@@ -255,7 +313,9 @@ export async function handleRenderVideo(videoId: string): Promise<void> {
       }),
     ]);
 
-    console.log(`[render-video] ${videoId} rendered and uploaded.`);
+    console.log(
+      `[render-video] ${videoId} rendered and uploaded (voice=${voiceStatus}).`
+    );
   } catch (error) {
     await markFailed(
       error instanceof Error ? error.message : "Video render failed."

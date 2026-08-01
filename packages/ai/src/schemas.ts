@@ -40,6 +40,7 @@ export const videoSceneSchema = z.object({
   narration: z.string().min(1).max(800),
   onScreenText: z.string().min(1).max(120),
   durationSeconds: z.number().min(2).max(8),
+  role: z.enum(["hook", "point", "cta"]).default("point"),
 });
 
 export const youtubeScriptSchema = z.object({

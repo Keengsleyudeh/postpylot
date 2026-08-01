@@ -82,14 +82,26 @@ export async function generateVideoAction(
 
   try {
     const brandContext = toBrandContext(brand);
-    const topic = await topicAgent(brandContext, parsed.data.topicHint);
-    const script = await youtubeScriptAgent(brandContext, topic);
+    const userTopic = parsed.data.topicHint?.trim() || undefined;
+
+    // When the user provides a topic, use it literally — do not let the Topic
+    // Agent reinterpret or swap subjects.
+    const topic = userTopic
+      ? {
+          title: userTopic.slice(0, 200),
+          angle: "User-requested topic — stay literal",
+          rationale: "Provided directly by the user.",
+        }
+      : await topicAgent(brandContext);
+
+    const script = await youtubeScriptAgent(brandContext, topic, userTopic);
 
     const narration = script.scenes.map((s) => s.narration).join("\n\n");
     const metadata: Prisma.InputJsonValue = {
       tags: script.tags,
       scenes: script.scenes,
       topicTitle: topic.title,
+      ...(userTopic ? { userTopic } : {}),
     };
 
     const video = await prisma.video.create({
